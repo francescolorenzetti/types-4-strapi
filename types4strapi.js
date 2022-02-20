@@ -117,6 +117,14 @@ for (const path of root) {
             if (tsImports.every(x => x !== type)) tsImports.push(type);
             tsProperty = `    ${key}: { data: ${type}${value.multiple ? '[]' : ''} };\n`;
         }
+        else if (type === 'enumeration') {
+            type = 'string';
+            tsProperty = `    ${key}: ${type};\n`;
+        }
+        else if (type === 'json') {
+            type = 'any';
+            tsProperty = `    ${key}: ${type};\n`;
+        }
         else {
             tsProperty = `    ${key}: ${type};\n`;
         }
