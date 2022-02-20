@@ -1,7 +1,7 @@
 var fs = require('fs');
 
 // --------------------------------------------
-// User
+// IUser
 // --------------------------------------------
 
 var userTsInterface = '';
@@ -18,7 +18,7 @@ userTsInterface += `}\n`;
 fs.writeFileSync(`types/IUser.ts`, userTsInterface);
 
 // --------------------------------------------
-// Nested User (when User is a child of another entity)
+// INestedUser (when User is a child of another entity)
 // --------------------------------------------
 
 var nestedUserTsInterface = '';
@@ -37,10 +37,30 @@ nestedUserTsInterface += `}\n`;
 fs.writeFileSync(`types/INestedUser.ts`, nestedUserTsInterface);
 
 // --------------------------------------------
-// Media
+// IMediaFormat
+// --------------------------------------------
+
+var mediaFormatTsInterface = '';
+mediaFormatTsInterface += `export interface IMediaFormat {\n`;
+mediaFormatTsInterface += `  name: string;\n`;
+mediaFormatTsInterface += `  hash: string;\n`;
+mediaFormatTsInterface += `  ext: string;\n`;
+mediaFormatTsInterface += `  mime: string;\n`;
+mediaFormatTsInterface += `  width: number;\n`;
+mediaFormatTsInterface += `  height: number;\n`;
+mediaFormatTsInterface += `  size: number;\n`;
+mediaFormatTsInterface += `  path: string;\n`;
+mediaFormatTsInterface += `  url: string;\n`;
+mediaFormatTsInterface += `}\n`;
+fs.writeFileSync(`types/IMediaFormat.ts`, mediaFormatTsInterface);
+
+// --------------------------------------------
+// IMedia
 // --------------------------------------------
 
 var mediaTsInterface = '';
+mediaTsInterface += `import { IMediaFormat } from './IMediaFormat';\n`;
+mediaTsInterface += `\n`;
 mediaTsInterface += `export interface IMedia {\n`;
 mediaTsInterface += `  id: number;\n`;
 mediaTsInterface += `  attributes: {\n`;
@@ -49,6 +69,7 @@ mediaTsInterface += `    alternativeText: string;\n`;
 mediaTsInterface += `    caption: string;\n`;
 mediaTsInterface += `    width: number;\n`;
 mediaTsInterface += `    height: number;\n`;
+mediaTsInterface += `    formats: { thumbnail: IMediaFormat; medium: IMediaFormat; small: IMediaFormat; };\n`;
 mediaTsInterface += `    hash: string;\n`;
 mediaTsInterface += `    ext: string;\n`;
 mediaTsInterface += `    mime: string;\n`;
@@ -78,10 +99,9 @@ for (const path of root) {
     tsInterface += `  attributes: {\n`;
     var schema = JSON.parse(fs.readFileSync(`./src/api/${path}/content-types/${path}/schema.json`, 'utf8'));
     const attributes = Object.entries(schema.attributes);
-    for (const prop of attributes) {
-        const key = prop[0]
-        const value = prop[1];
-        const isArray = value.relation === 'oneToMany';
+    for (const attribute of attributes) {
+        const key = attribute[0];
+        const value = attribute[1];
         var type = value.type;
         var tsProperty;
         if (type === 'relation') {
@@ -89,15 +109,16 @@ for (const path of root) {
                 'INestedUser' :
                 `I${capitalize(value.target.split('.')[1])}`;
             if (tsImports.every(x => x !== type)) tsImports.push(type);
+            const isArray = value.relation === 'oneToMany';
             tsProperty = `    ${key}: { data: ${type}${isArray ? '[]' : ''} };\n`;
         }
         else if (type === 'media') {
             type = 'IMedia';
             if (tsImports.every(x => x !== type)) tsImports.push(type);
-            tsProperty = `    ${key}: { data: ${type}${isArray ? '[]' : ''} };\n`;
+            tsProperty = `    ${key}: { data: ${type}${value.multiple ? '[]' : ''} };\n`;
         }
         else {
-            tsProperty = `    ${key}: ${type}${isArray ? '[]' : ''};\n`;
+            tsProperty = `    ${key}: ${type};\n`;
         }
         tsInterface += tsProperty;
     }
