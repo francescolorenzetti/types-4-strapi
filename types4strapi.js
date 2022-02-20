@@ -85,7 +85,9 @@ for (const path of root) {
         var type = value.type;
         var tsProperty;
         if (type === 'relation') {
-            type = getInterfaceNameFromTarget(value.target);
+            type = value.target === 'plugin::users-permissions.user' ?
+                'INestedUser' :
+                `I${capitalize(value.target.split('.')[1])}`;
             if (tsImports.every(x => x !== type)) tsImports.push(type);
             tsProperty = `    ${key}: { data: ${type}${isArray ? '[]' : ''} };\n`;
         }
@@ -110,8 +112,4 @@ for (const path of root) {
 function capitalize(str) {
     if (!str) return;
     return str.charAt(0).toUpperCase() + str.slice(1);
-}
-
-function getInterfaceNameFromTarget(type) {
-    return `I${capitalize(type.split('.')[1])}`;
 }
