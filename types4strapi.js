@@ -87,14 +87,12 @@ fs.writeFileSync(`types/IMedia.ts`, mediaTsInterface);
 // API Types
 // --------------------------------------------
 
-var root = fs.readdirSync('./src/api');
-root = root.filter(x => !x.startsWith('.'));
+var root = fs.readdirSync('./src/api').filter(x => !x.startsWith('.'));
 
 for (const path of root) {
     var tsImports = [];
-    const tsInterfaceName = 'I' + capitalize(path);
     var tsInterface = `\n`;
-    tsInterface += `export interface ${tsInterfaceName} {\n`;
+    tsInterface += `export interface I${capitalize(path)} {\n`;
     tsInterface += `  id: number;\n`;
     tsInterface += `  attributes: {\n`;
     var schema = JSON.parse(fs.readFileSync(`./src/api/${path}/content-types/${path}/schema.json`, 'utf8'));
@@ -132,7 +130,7 @@ for (const path of root) {
     }
     tsInterface += `  }\n`;
     tsInterface += '}'
-    for (tsImport of tsImports) {
+    for (const tsImport of tsImports) {
         tsInterface = `import { ${tsImport} } from './${tsImport}';\n` + tsInterface;
     }
     fs.writeFileSync(`types/I${capitalize(path)}.ts`, tsInterface);
