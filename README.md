@@ -1,4 +1,4 @@
-# types4strapi
+# types-4-strapi
 Typescript interface generator for Strapi 4 models
 
 ## Usage
