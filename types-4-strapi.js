@@ -9,83 +9,86 @@ if (!fs.existsSync(typesDir))
 // IUser
 // --------------------------------------------
 
-var userTsInterface = '';
-userTsInterface += `export interface IUser {\n`;
-userTsInterface += `  id: number;\n`;
-userTsInterface += `  username: string;\n`;
-userTsInterface += `  email: string;\n`;
-userTsInterface += `  provider: string;\n`;
-userTsInterface += `  confirmed: boolean;\n`;
-userTsInterface += `  blocked: boolean;\n`;
-userTsInterface += `  createdAt: Date;\n`;
-userTsInterface += `  updatedAt: Date;\n`;
-userTsInterface += `}\n`;
+const userTsInterface =
+`export interface IUser {
+  id: number;
+  username: string;
+  email: string;
+  provider: string;
+  blocked: boolean;
+  createdAt: Date;
+  updatedAt: Date;
+}`;
+
 fs.writeFileSync(`${typesDir}/IUser.ts`, userTsInterface);
 
 // --------------------------------------------
 // INestedUser (when User is a child of another entity)
 // --------------------------------------------
 
-var nestedUserTsInterface = '';
-nestedUserTsInterface += `export interface INestedUser {\n`;
-nestedUserTsInterface += `  id: number;\n`;
-nestedUserTsInterface += `  attributes: {\n`;
-nestedUserTsInterface += `    username: string;\n`;
-nestedUserTsInterface += `    email: string;\n`;
-nestedUserTsInterface += `    provider: string;\n`;
-nestedUserTsInterface += `    confirmed: boolean;\n`;
-nestedUserTsInterface += `    blocked: boolean;\n`;
-nestedUserTsInterface += `    createdAt: Date;\n`;
-nestedUserTsInterface += `    updatedAt: Date;\n`;
-nestedUserTsInterface += `  }\n`;
-nestedUserTsInterface += `}\n`;
+const nestedUserTsInterface = 
+`export interface INestedUser {
+  id: number;
+  attributes: {
+    username: string;
+    email: string;
+    provider: string;
+    confirmed: boolean;
+    blocked: boolean;
+    createdAt: Date;
+    updatedAt: Date;
+  }
+}`;
+
 fs.writeFileSync(`${typesDir}/INestedUser.ts`, nestedUserTsInterface);
 
 // --------------------------------------------
 // IMediaFormat
 // --------------------------------------------
 
-var mediaFormatTsInterface = '';
-mediaFormatTsInterface += `export interface IMediaFormat {\n`;
-mediaFormatTsInterface += `  name: string;\n`;
-mediaFormatTsInterface += `  hash: string;\n`;
-mediaFormatTsInterface += `  ext: string;\n`;
-mediaFormatTsInterface += `  mime: string;\n`;
-mediaFormatTsInterface += `  width: number;\n`;
-mediaFormatTsInterface += `  height: number;\n`;
-mediaFormatTsInterface += `  size: number;\n`;
-mediaFormatTsInterface += `  path: string;\n`;
-mediaFormatTsInterface += `  url: string;\n`;
-mediaFormatTsInterface += `}\n`;
+var mediaFormatTsInterface = 
+`export interface IMediaFormat {
+  name: string;
+  hash: string;
+  ext: string;
+  mime: string;
+  width: number;
+  height: number;
+  size: number;
+  path: string;
+  url: string;
+}`;
+
 fs.writeFileSync(`${typesDir}/IMediaFormat.ts`, mediaFormatTsInterface);
 
 // --------------------------------------------
 // IMedia
 // --------------------------------------------
 
-var mediaTsInterface = '';
-mediaTsInterface += `import { IMediaFormat } from './IMediaFormat';\n`;
-mediaTsInterface += `\n`;
-mediaTsInterface += `export interface IMedia {\n`;
-mediaTsInterface += `  id: number;\n`;
-mediaTsInterface += `  attributes: {\n`;
-mediaTsInterface += `    name: string;\n`;
-mediaTsInterface += `    alternativeText: string;\n`;
-mediaTsInterface += `    caption: string;\n`;
-mediaTsInterface += `    width: number;\n`;
-mediaTsInterface += `    height: number;\n`;
-mediaTsInterface += `    formats: { thumbnail: IMediaFormat; medium: IMediaFormat; small: IMediaFormat; };\n`;
-mediaTsInterface += `    hash: string;\n`;
-mediaTsInterface += `    ext: string;\n`;
-mediaTsInterface += `    mime: string;\n`;
-mediaTsInterface += `    size: number;\n`;
-mediaTsInterface += `    url: string;\n`;
-mediaTsInterface += `    previewUrl: string;\n`;
-mediaTsInterface += `    provider: string;\n`;
-mediaTsInterface += `    createdAt: Date;\n`;
-mediaTsInterface += `    updatedAt: Date;\n`;
-mediaTsInterface += `  }\n`;
-mediaTsInterface += `}\n`;
+var mediaTsInterface = 
+`import { IMediaFormat } from './IMediaFormat';
+
+export interface IMedia {
+  id: number;
+  attributes: {
+    name: string;
+    alternativeText: string;
+    caption: string;
+    width: number;
+    height: number;
+    formats: { thumbnail: IMediaFormat; medium: IMediaFormat; small: IMediaFormat; };
+    hash: string;
+    ext: string;
+    mime: string;
+    size: number;
+    url: string;
+    previewUrl: string;
+    provider: string;
+    createdAt: Date;
+    updatedAt: Date;
+  }
+}`;
+
 fs.writeFileSync(`${typesDir}/IMedia.ts`, mediaTsInterface);
 
 // --------------------------------------------
