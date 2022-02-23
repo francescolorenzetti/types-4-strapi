@@ -5,7 +5,6 @@ const typesDir = 'types';
 if (!fs.existsSync(typesDir))
     fs.mkdirSync(typesDir);
 
-
 // --------------------------------------------
 // IUser
 // --------------------------------------------
@@ -101,7 +100,15 @@ for (const path of root) {
     tsInterface += `export interface I${capitalize(path)} {\n`;
     tsInterface += `  id: number;\n`;
     tsInterface += `  attributes: {\n`;
-    var schema = JSON.parse(fs.readFileSync(`./src/api/${path}/content-types/${path}/schema.json`, 'utf8'));
+    var schemaFile;
+    try {
+        schemaFile = fs.readFileSync(`./src/api/${path}/content-types/${path}/schema.json`, 'utf8');
+        var schema = JSON.parse(schemaFile);
+    }
+    catch (e) {
+        console.log(`Skipping ${path} folder: could not parse schema.json`);
+        continue;
+    }
     const attributes = Object.entries(schema.attributes);
     for (const attribute of attributes) {
         const key = attribute[0];
