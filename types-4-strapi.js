@@ -1,5 +1,11 @@
 var fs = require('fs');
 
+const typesDir = 'types';
+
+if (!fs.existsSync(typesDir))
+    fs.mkdirSync(typesDir);
+
+
 // --------------------------------------------
 // IUser
 // --------------------------------------------
@@ -15,7 +21,7 @@ userTsInterface += `  blocked: boolean;\n`;
 userTsInterface += `  createdAt: Date;\n`;
 userTsInterface += `  updatedAt: Date;\n`;
 userTsInterface += `}\n`;
-fs.writeFileSync(`types/IUser.ts`, userTsInterface);
+fs.writeFileSync(`${typesDir}/IUser.ts`, userTsInterface);
 
 // --------------------------------------------
 // INestedUser (when User is a child of another entity)
@@ -34,7 +40,7 @@ nestedUserTsInterface += `    createdAt: Date;\n`;
 nestedUserTsInterface += `    updatedAt: Date;\n`;
 nestedUserTsInterface += `  }\n`;
 nestedUserTsInterface += `}\n`;
-fs.writeFileSync(`types/INestedUser.ts`, nestedUserTsInterface);
+fs.writeFileSync(`${typesDir}/INestedUser.ts`, nestedUserTsInterface);
 
 // --------------------------------------------
 // IMediaFormat
@@ -52,7 +58,7 @@ mediaFormatTsInterface += `  size: number;\n`;
 mediaFormatTsInterface += `  path: string;\n`;
 mediaFormatTsInterface += `  url: string;\n`;
 mediaFormatTsInterface += `}\n`;
-fs.writeFileSync(`types/IMediaFormat.ts`, mediaFormatTsInterface);
+fs.writeFileSync(`${typesDir}/IMediaFormat.ts`, mediaFormatTsInterface);
 
 // --------------------------------------------
 // IMedia
@@ -81,7 +87,7 @@ mediaTsInterface += `    createdAt: Date;\n`;
 mediaTsInterface += `    updatedAt: Date;\n`;
 mediaTsInterface += `  }\n`;
 mediaTsInterface += `}\n`;
-fs.writeFileSync(`types/IMedia.ts`, mediaTsInterface);
+fs.writeFileSync(`${typesDir}/IMedia.ts`, mediaTsInterface);
 
 // --------------------------------------------
 // API Types
@@ -136,7 +142,7 @@ for (const path of root) {
     for (const tsImport of tsImports) {
         tsInterface = `import { ${tsImport} } from './${tsImport}';\n` + tsInterface;
     }
-    fs.writeFileSync(`types/I${capitalize(path)}.ts`, tsInterface);
+    fs.writeFileSync(`${typesDir}/I${capitalize(path)}.ts`, tsInterface);
 }
 
 function capitalize(str) {
