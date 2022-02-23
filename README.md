@@ -10,7 +10,7 @@ Typescript interface generator for Strapi 4 models
 
 ## Strapi 4 quirks
 
-The `user` object returned by the `/users` endpoint is different from the one returned by other endpoints when `user` is one of their child properties. For this reason, types-4-strapi generates two different types: `IUser` and `INestedUser`:
+The `user` object returned by the `/users` endpoint is different from the one returned by other endpoints when `user` is a nested property. For this reason, types-4-strapi generates two different types: `IUser` and `INestedUser`:
 
 ```
 export interface IUser {
