@@ -90,21 +90,22 @@ fs.writeFileSync(`${typesDir}/IMedia.ts`, mediaTsInterface);
 // API Types
 // --------------------------------------------
 
-var root = fs.readdirSync('./src/api').filter((x) => !x.startsWith('.'));
+var apiFolder = fs.readdirSync('./src/api').filter((x) => !x.startsWith('.'));
 
-for (const path of root) {
+for (const path of apiFolder) {
   var tsImports = [];
   var tsInterface = `\n`;
   tsInterface += `export interface I${formatPath(path)} {\n`;
   tsInterface += `  id: number;\n`;
   tsInterface += `  attributes: {\n`;
   var schemaFile;
+  var schema;
   try {
     schemaFile = fs.readFileSync(
       `./src/api/${path}/content-types/${path}/schema.json`,
       'utf8'
     );
-    var schema = JSON.parse(schemaFile);
+    schema = JSON.parse(schemaFile);
   } catch (e) {
     console.log(`Skipping ${path} folder: could not parse schema.json`);
     continue;
@@ -157,6 +158,34 @@ for (const path of root) {
       `import { ${tsImport} } from './${tsImport}';\n` + tsInterface;
   }
   fs.writeFileSync(`${typesDir}/I${formatPath(path)}.ts`, tsInterface);
+}
+
+// --------------------------------------------
+// Components
+// --------------------------------------------
+
+var componentsFolder = fs.readdirSync('./src/components');
+
+for (const categoryPath of componentsFolder) {
+  var categoryFolder = fs.readdirSync(`./src/components/${categoryPath}`);
+  for (const componentPath of categoryFolder) {
+    var schemaFile;
+    var schema;
+    try {
+      schemaFile = fs.readFileSync(
+        `./src/components/${categoryPath}/${componentPath}`,
+        'utf8'
+      );
+      schema = JSON.parse(schemaFile);
+      /**
+       * TODO: create types in /types/components
+       * to avoid name conflicts with other types
+       */
+    } catch (e) {
+      console.log(`Skipping ${componentPath}: could not parse json file`);
+      continue;
+    }
+  }
 }
 
 // --------------------------------------------
