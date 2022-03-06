@@ -100,7 +100,7 @@ var root = fs.readdirSync('./src/api').filter(x => !x.startsWith('.'));
 for (const path of root) {
     var tsImports = [];
     var tsInterface = `\n`;
-    tsInterface += `export interface I${capitalize(path)} {\n`;
+    tsInterface += `export interface I${formatPath(path)} {\n`;
     tsInterface += `  id: number;\n`;
     tsInterface += `  attributes: {\n`;
     var schemaFile;
@@ -121,7 +121,7 @@ for (const path of root) {
         if (type === 'relation') {
             type = value.target === 'plugin::users-permissions.user' ?
                 'INestedUser' :
-                `I${capitalize(value.target.split('.')[1])}`;
+                `I${formatPath(value.target.split('.')[1])}`;
             if (tsImports.every(x => x !== type)) tsImports.push(type);
             const isArray = value.relation === 'oneToMany';
             tsProperty = `    ${key}: { data: ${type}${isArray ? '[]' : ''} };\n`;
@@ -152,10 +152,15 @@ for (const path of root) {
     for (const tsImport of tsImports) {
         tsInterface = `import { ${tsImport} } from './${tsImport}';\n` + tsInterface;
     }
-    fs.writeFileSync(`${typesDir}/I${capitalize(path)}.ts`, tsInterface);
+    fs.writeFileSync(`${typesDir}/I${formatPath(path)}.ts`, tsInterface);
 }
 
-function capitalize(str) {
-    if (!str) return;
-    return str.charAt(0).toUpperCase() + str.slice(1);
+function formatPath(str) {
+  const words = str.match(/[a-z]+/gi);
+  if (!words) return;
+  return words
+    .map(function (word) {
+      return word.charAt(0).toUpperCase() + word.substr(1).toLowerCase();
+    })
+    .join('');
 }
