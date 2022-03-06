@@ -93,70 +93,70 @@ fs.writeFileSync(`${typesDir}/IMedia.ts`, mediaTsInterface);
 var root = fs.readdirSync('./src/api').filter((x) => !x.startsWith('.'));
 
 for (const path of root) {
-	var tsImports = [];
-	var tsInterface = `\n`;
-	tsInterface += `export interface I${formatPath(path)} {\n`;
-	tsInterface += `  id: number;\n`;
-	tsInterface += `  attributes: {\n`;
-	var schemaFile;
-	try {
-		schemaFile = fs.readFileSync(
-			`./src/api/${path}/content-types/${path}/schema.json`,
-			'utf8'
-		);
-		var schema = JSON.parse(schemaFile);
-	} catch (e) {
-		console.log(`Skipping ${path} folder: could not parse schema.json`);
-		continue;
-	}
-	const attributes = Object.entries(schema.attributes);
-	for (const attribute of attributes) {
-		const key = attribute[0];
-		const value = attribute[1];
-		var type = value.type;
-		var tsProperty;
-		if (type === 'relation') {
-			type =
-				value.target === 'plugin::users-permissions.user'
-					? 'INestedUser'
-					: `I${formatPath(value.target.split('.')[1])}`;
-			if (tsImports.every((x) => x !== type)) tsImports.push(type);
-			const isArray = value.relation === 'oneToMany';
-			tsProperty = `    ${key}: { data: ${type}${isArray ? '[]' : ''} };\n`;
-		} else if (type === 'component') {
-			// TODO: create dedicated types for components
-			type = 'any';
-			tsProperty = `    ${key}: ${type};\n`;
-		} else if (type === 'media') {
-			type = 'IMedia';
-			if (tsImports.every((x) => x !== type)) tsImports.push(type);
-			tsProperty = `    ${key}: { data: ${type}${
-				value.multiple ? '[]' : ''
-			} };\n`;
-		} else if (
-			type === 'enumeration' ||
-			type === 'richtext' ||
-			type === 'email'
-		) {
-			type = 'string';
-			tsProperty = `    ${key}: ${type};\n`;
-		} else if (type === 'json') {
-			type = 'any';
-			tsProperty = `    ${key}: ${type};\n`;
-		} else if (type === 'password') {
-			tsProperty = '';
-		} else {
-			tsProperty = `    ${key}: ${type};\n`;
-		}
-		tsInterface += tsProperty;
-	}
-	tsInterface += `  }\n`;
-	tsInterface += '}';
-	for (const tsImport of tsImports) {
-		tsInterface =
-			`import { ${tsImport} } from './${tsImport}';\n` + tsInterface;
-	}
-	fs.writeFileSync(`${typesDir}/I${formatPath(path)}.ts`, tsInterface);
+  var tsImports = [];
+  var tsInterface = `\n`;
+  tsInterface += `export interface I${formatPath(path)} {\n`;
+  tsInterface += `  id: number;\n`;
+  tsInterface += `  attributes: {\n`;
+  var schemaFile;
+  try {
+    schemaFile = fs.readFileSync(
+      `./src/api/${path}/content-types/${path}/schema.json`,
+      'utf8'
+    );
+    var schema = JSON.parse(schemaFile);
+  } catch (e) {
+    console.log(`Skipping ${path} folder: could not parse schema.json`);
+    continue;
+  }
+  const attributes = Object.entries(schema.attributes);
+  for (const attribute of attributes) {
+    const key = attribute[0];
+    const value = attribute[1];
+    var type = value.type;
+    var tsProperty;
+    if (type === 'relation') {
+      type =
+        value.target === 'plugin::users-permissions.user'
+          ? 'INestedUser'
+          : `I${formatPath(value.target.split('.')[1])}`;
+      if (tsImports.every((x) => x !== type)) tsImports.push(type);
+      const isArray = value.relation === 'oneToMany';
+      tsProperty = `    ${key}: { data: ${type}${isArray ? '[]' : ''} };\n`;
+    } else if (type === 'component') {
+      // TODO: create dedicated types for components
+      type = 'any';
+      tsProperty = `    ${key}: ${type};\n`;
+    } else if (type === 'media') {
+      type = 'IMedia';
+      if (tsImports.every((x) => x !== type)) tsImports.push(type);
+      tsProperty = `    ${key}: { data: ${type}${
+        value.multiple ? '[]' : ''
+      } };\n`;
+    } else if (
+      type === 'enumeration' ||
+      type === 'richtext' ||
+      type === 'email'
+    ) {
+      type = 'string';
+      tsProperty = `    ${key}: ${type};\n`;
+    } else if (type === 'json') {
+      type = 'any';
+      tsProperty = `    ${key}: ${type};\n`;
+    } else if (type === 'password') {
+      tsProperty = '';
+    } else {
+      tsProperty = `    ${key}: ${type};\n`;
+    }
+    tsInterface += tsProperty;
+  }
+  tsInterface += `  }\n`;
+  tsInterface += '}';
+  for (const tsImport of tsImports) {
+    tsInterface =
+      `import { ${tsImport} } from './${tsImport}';\n` + tsInterface;
+  }
+  fs.writeFileSync(`${typesDir}/I${formatPath(path)}.ts`, tsInterface);
 }
 
 // --------------------------------------------
@@ -164,11 +164,11 @@ for (const path of root) {
 // --------------------------------------------
 
 function formatPath(str) {
-	const words = str.match(/[a-z]+/gi);
-	if (!words) return;
-	return words
-		.map(function (word) {
-			return word.charAt(0).toUpperCase() + word.substr(1).toLowerCase();
-		})
-		.join('');
+  const words = str.match(/[a-z]+/gi);
+  if (!words) return;
+  return words
+    .map(function (word) {
+      return word.charAt(0).toUpperCase() + word.substr(1).toLowerCase();
+    })
+    .join('');
 }
