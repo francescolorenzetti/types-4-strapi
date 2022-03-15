@@ -50,8 +50,8 @@ await fetch('https://project.com/api/users', {
   method: 'POST',
   body: JSON.stringify({
     username: 'Jon Snow',
-    email: 'jon.snow@housestark.com'
-  })
+    email: 'jon.snow@housestark.com',
+  }),
 });
 
 // incorrect
@@ -60,22 +60,22 @@ await fetch('https://project.com/api/users', {
   body: JSON.stringify({
     attributes: {
       username: 'Jon Snow',
-      email: 'jon.snow@housestark.com'
-    }
-  })
+      email: 'jon.snow@housestark.com',
+    },
+  }),
 });
 ```
 
 In these cases, rather than creating completely new types, we recommend that you simply 'extract' the type of the `attribute` object from the entity's interface using **indexed access types**.
 
 ```ts
-const body = {
-  username: 'Jon Snow',
-  email: 'jon.snow@housestark.com'
-} as User['attributes'];
+type UserAttributes = User['attributes'];
 
-await fetch(https://project.com/api/users, {
+await fetch('https://project.com/api/users', {
   method: 'POST',
-  body
+  body: {
+    username: 'Jon Snow',
+    email: 'jon.snow@housestark.com',
+  } as UserAttributes
 });
 ```
