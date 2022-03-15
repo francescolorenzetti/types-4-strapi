@@ -12,7 +12,7 @@ Typescript interface generator for Strapi 4 models.
 
 In most cases, Strapi returns objects where all the properties (aside from `id`) are wrapped into an `attributes` object. For this reason, this is how types-4-strapi's interfaces are structured.
 
-```ts
+```
 {
   id: number;
   attributes: {
@@ -29,7 +29,7 @@ In most cases, Strapi returns objects where all the properties (aside from `id`)
 
 However, sometimes the same object is returned "flattened". This is the case, for instance, for the `/api/users` endpoint, which returns an array of objects with the following structure:
 
-```ts
+```
 {
   id: number;
   username: string;
