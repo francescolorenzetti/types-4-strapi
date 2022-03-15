@@ -21,22 +21,6 @@ fs.writeFileSync(`${typesDir}/Payload.ts`, payloadTsInterface);
 
 const userTsInterface = `export interface User {
   id: number;
-  username: string;
-  email: string;
-  provider: string;
-  blocked: boolean;
-  createdAt: Date;
-  updatedAt: Date;
-}`;
-
-fs.writeFileSync(`${typesDir}/User.ts`, userTsInterface);
-
-// --------------------------------------------
-// NestedUser (when User is a child of another entity)
-// --------------------------------------------
-
-const nestedUserTsInterface = `export interface NestedUser {
-  id: number;
   attributes: {
     username: string;
     email: string;
@@ -48,7 +32,7 @@ const nestedUserTsInterface = `export interface NestedUser {
   }
 }`;
 
-fs.writeFileSync(`${typesDir}/NestedUser.ts`, nestedUserTsInterface);
+fs.writeFileSync(`${typesDir}/User.ts`, userTsInterface);
 
 // --------------------------------------------
 // MediaFormat
