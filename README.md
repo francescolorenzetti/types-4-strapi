@@ -12,7 +12,7 @@ Typescript interface generator for Strapi 4 models.
 
 In most cases, Strapi returns objects where all the properties (aside from `id`) are wrapped into an `attributes` object. For this reason, this is how types-4-strapi's interfaces are structured.
 
-```
+```ts
 {
   id: number;
   attributes: {
@@ -29,7 +29,7 @@ In most cases, Strapi returns objects where all the properties (aside from `id`)
 
 However, sometimes the same object is returned "flattened". This is the case, for instance, for the `/api/users` endpoint, which returns an array of objects with the following structure:
 
-```
+```ts
 {
   id: number;
   username: string;
@@ -44,19 +44,31 @@ However, sometimes the same object is returned "flattened". This is the case, fo
 
 The same "flat" structure is also required when submitting the body of `POST` and `PUT` requests. Here is an example using `fetch`.
 
-```
-  await fetch(https://project.com/api/users, {
-    method: 'POST',
-    body: JSON.stringify({
+```ts
+// correct
+await fetch('https://project.com/api/users', {
+  method: 'POST',
+  body: JSON.stringify({
+    username: 'Jon Snow',
+    email: 'jon.snow@housestark.com'
+  })
+});
+
+// incorrect
+await fetch('https://project.com/api/users', {
+  method: 'POST',
+  body: JSON.stringify({
+    attributes: {
       username: 'Jon Snow',
       email: 'jon.snow@housestark.com'
-    })
-  });
+    }
+  })
+});
 ```
 
 In these cases, rather than creating completely new types, we recommend that you simply 'extract' the type of the `attribute` object from the entity's interface using **indexed access types**.
 
-```
+```ts
 const body = {
   username: 'Jon Snow',
   email: 'jon.snow@housestark.com'
