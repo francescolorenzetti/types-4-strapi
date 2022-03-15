@@ -5,10 +5,21 @@ const typesDir = 'types';
 if (!fs.existsSync(typesDir)) fs.mkdirSync(typesDir);
 
 // --------------------------------------------
-// IUser
+// Payload
 // --------------------------------------------
 
-const userTsInterface = `export interface IUser {
+const payloadTsInterface = `export interface Payload<T> {
+  data: T;
+  meta?: any;
+}`;
+
+fs.writeFileSync(`${typesDir}/Payload.ts`, payloadTsInterface);
+
+// --------------------------------------------
+// User
+// --------------------------------------------
+
+const userTsInterface = `export interface User {
   id: number;
   username: string;
   email: string;
@@ -18,13 +29,13 @@ const userTsInterface = `export interface IUser {
   updatedAt: Date;
 }`;
 
-fs.writeFileSync(`${typesDir}/IUser.ts`, userTsInterface);
+fs.writeFileSync(`${typesDir}/User.ts`, userTsInterface);
 
 // --------------------------------------------
-// INestedUser (when User is a child of another entity)
+// NestedUser (when User is a child of another entity)
 // --------------------------------------------
 
-const nestedUserTsInterface = `export interface INestedUser {
+const nestedUserTsInterface = `export interface NestedUser {
   id: number;
   attributes: {
     username: string;
@@ -37,13 +48,13 @@ const nestedUserTsInterface = `export interface INestedUser {
   }
 }`;
 
-fs.writeFileSync(`${typesDir}/INestedUser.ts`, nestedUserTsInterface);
+fs.writeFileSync(`${typesDir}/NestedUser.ts`, nestedUserTsInterface);
 
 // --------------------------------------------
-// IMediaFormat
+// MediaFormat
 // --------------------------------------------
 
-var mediaFormatTsInterface = `export interface IMediaFormat {
+var mediaFormatTsInterface = `export interface MediaFormat {
   name: string;
   hash: string;
   ext: string;
@@ -55,15 +66,15 @@ var mediaFormatTsInterface = `export interface IMediaFormat {
   url: string;
 }`;
 
-fs.writeFileSync(`${typesDir}/IMediaFormat.ts`, mediaFormatTsInterface);
+fs.writeFileSync(`${typesDir}/MediaFormat.ts`, mediaFormatTsInterface);
 
 // --------------------------------------------
-// IMedia
+// Media
 // --------------------------------------------
 
-var mediaTsInterface = `import { IMediaFormat } from './IMediaFormat';
+var mediaTsInterface = `import { MediaFormat } from './MediaFormat';
 
-export interface IMedia {
+export interface Media {
   id: number;
   attributes: {
     name: string;
@@ -71,7 +82,7 @@ export interface IMedia {
     caption: string;
     width: number;
     height: number;
-    formats: { thumbnail: IMediaFormat; medium: IMediaFormat; small: IMediaFormat; };
+    formats: { thumbnail: MediaFormat; medium: MediaFormat; small: MediaFormat; };
     hash: string;
     ext: string;
     mime: string;
@@ -84,7 +95,7 @@ export interface IMedia {
   }
 }`;
 
-fs.writeFileSync(`${typesDir}/IMedia.ts`, mediaTsInterface);
+fs.writeFileSync(`${typesDir}/Media.ts`, mediaTsInterface);
 
 // --------------------------------------------
 // API Types
@@ -95,7 +106,7 @@ var root = fs.readdirSync('./src/api').filter((x) => !x.startsWith('.'));
 for (const path of root) {
   var tsImports = [];
   var tsInterface = `\n`;
-  tsInterface += `export interface I${formatPath(path)} {\n`;
+  tsInterface += `export interface ${formatPath(path)} {\n`;
   tsInterface += `  id: number;\n`;
   tsInterface += `  attributes: {\n`;
   var schemaFile;
@@ -118,17 +129,19 @@ for (const path of root) {
     if (type === 'relation') {
       type =
         value.target === 'plugin::users-permissions.user'
-          ? 'INestedUser'
-          : `I${formatPath(value.target.split('.')[1])}`;
+          ? 'NestedUser'
+          : `${formatPath(value.target.split('.')[1])}`;
       if (tsImports.every((x) => x !== type)) tsImports.push(type);
       const isArray = value.relation === 'oneToMany';
-      tsProperty = `    ${key}: { data: ${type}${isArray ? '[]' : ''} };\n`;
+      tsProperty = `    ${key}: { data: ${type}${
+        isArray ? '[]' : ''
+      } } | number;\n`;
     } else if (type === 'component') {
       // TODO: create dedicated types for components
       type = 'any';
       tsProperty = `    ${key}: ${type};\n`;
     } else if (type === 'media') {
-      type = 'IMedia';
+      type = 'Media';
       if (tsImports.every((x) => x !== type)) tsImports.push(type);
       tsProperty = `    ${key}: { data: ${type}${
         value.multiple ? '[]' : ''
@@ -145,6 +158,9 @@ for (const path of root) {
       tsProperty = `    ${key}: ${type};\n`;
     } else if (type === 'password') {
       tsProperty = '';
+    } else if (type === 'integer' || type === 'decimal' || type === 'float') {
+      type = 'number';
+      tsProperty = `    ${key}: ${type};\n`;
     } else {
       tsProperty = `    ${key}: ${type};\n`;
     }
@@ -156,7 +172,7 @@ for (const path of root) {
     tsInterface =
       `import { ${tsImport} } from './${tsImport}';\n` + tsInterface;
   }
-  fs.writeFileSync(`${typesDir}/I${formatPath(path)}.ts`, tsInterface);
+  fs.writeFileSync(`${typesDir}/${formatPath(path)}.ts`, tsInterface);
 }
 
 // --------------------------------------------
