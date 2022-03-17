@@ -90,7 +90,7 @@ fs.writeFileSync(`${typesDir}/Media.ts`, mediaTsInterface);
 var apiFolders = fs.readdirSync('./src/api').filter((x) => !x.startsWith('.'));
 
 for (const apiFolder of apiFolders) {
-  const interfaceName = getInterfaceNameFromApiFolder(apiFolder);
+  const interfaceName = PascalCase(apiFolder);
   const interface = createInterface(
     `./src/api/${apiFolder}/content-types/${apiFolder}/schema.json`,
     interfaceName
@@ -109,7 +109,7 @@ for (const componentCategoryFolder of componentCategoryFolders) {
     `./src/components/${componentCategoryFolder}`
   );
   for (const componentSchema of componentSchemas) {
-    const interfaceName = getInterfaceNameFromComponentSchema(componentSchema);
+    const interfaceName = PascalCase(componentSchema.replace('.json', ''));
     const interface = createInterface(
       `./src/components/${componentCategoryFolder}/${componentSchema}`,
       interfaceName
@@ -133,34 +133,6 @@ function PascalCase(str) {
     .join('');
 }
 
-/**
- * @param {string} apiFolder The api folder name, for instance: 'my-type'
- * @returns The interface name, for instance MyType
- */
-function getInterfaceNameFromApiFolder(apiFolder) {
-  const words = apiFolder.match(/[a-z]+/gi);
-  if (!words) return;
-  return words
-    .map(function (word) {
-      return word.charAt(0).toUpperCase() + word.substring(1).toLowerCase();
-    })
-    .join('');
-}
-
-/**
- * @param {string} componentSchema The component schema name, for instance: 'my-component.json'
- * @returns The interface name, for instance MyComponent
- */
-function getInterfaceNameFromComponentSchema(componentSchema) {
-  const words = componentSchema.replace('.json', '').match(/[a-z]+/gi);
-  if (!words) return;
-  return words
-    .map(function (word) {
-      return word.charAt(0).toUpperCase() + word.substring(1).toLowerCase();
-    })
-    .join('');
-}
-
 function createInterface(schemaPath, interfaceName) {
   var tsImports = [];
   var tsInterface = `\n`;
@@ -176,7 +148,6 @@ function createInterface(schemaPath, interfaceName) {
     console.log(`Skipping ${schemaPath}: could not parse schema`);
     return null;
   }
-  const isCollectionType = schema.kind === 'collectionType';
   const attributes = Object.entries(schema.attributes);
   for (const attribute of attributes) {
     const attributeName = attribute[0];
@@ -190,10 +161,8 @@ function createInterface(schemaPath, interfaceName) {
       type =
         attributeValue.target === 'plugin::users-permissions.user'
           ? 'User'
-          : `${getInterfaceNameFromApiFolder(
-              attributeValue.target.split('.')[1]
-            )}`;
-      var path = isCollectionType ? `./${type}` : `../${type}`;
+          : `${PascalCase(attributeValue.target.split('.')[1])}`;
+      var path = schema.kind === 'collectionType' ? `./${type}` : `../${type}`;
       if (tsImports.every((x) => x.path !== path))
         tsImports.push({
           type,
@@ -212,7 +181,8 @@ function createInterface(schemaPath, interfaceName) {
         attributeValue.target === 'plugin::users-permissions.user'
           ? 'User'
           : PascalCase(attributeValue.component.split('.')[1]);
-      var path = isCollectionType ? `./components/${type}` : `./${type}`;
+      var path =
+        schema.kind === 'collectionType' ? `./components/${type}` : `./${type}`;
       if (tsImports.every((x) => x.path !== path))
         tsImports.push({
           type,
