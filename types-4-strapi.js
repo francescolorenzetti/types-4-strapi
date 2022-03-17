@@ -1,8 +1,10 @@
 var fs = require('fs');
 
 const typesDir = 'types';
+const componentsDir = 'types/components';
 
 if (!fs.existsSync(typesDir)) fs.mkdirSync(typesDir);
+if (!fs.existsSync(componentsDir)) fs.mkdirSync(componentsDir);
 
 // --------------------------------------------
 // Payload
@@ -85,68 +87,160 @@ fs.writeFileSync(`${typesDir}/Media.ts`, mediaTsInterface);
 // API Types
 // --------------------------------------------
 
-var root = fs.readdirSync('./src/api').filter((x) => !x.startsWith('.'));
+var apiFolders = fs.readdirSync('./src/api').filter((x) => !x.startsWith('.'));
 
-for (const path of root) {
+for (const apiFolder of apiFolders) {
+  const interfaceName = PascalCase(apiFolder);
+  const interface = createInterface(
+    `./src/api/${apiFolder}/content-types/${apiFolder}/schema.json`,
+    interfaceName
+  );
+  if (interface) fs.writeFileSync(`${typesDir}/${interfaceName}.ts`, interface);
+}
+
+// --------------------------------------------
+// Components
+// --------------------------------------------
+
+var componentCategoryFolders = fs.readdirSync('./src/components');
+
+for (const componentCategoryFolder of componentCategoryFolders) {
+  var componentSchemas = fs.readdirSync(
+    `./src/components/${componentCategoryFolder}`
+  );
+  for (const componentSchema of componentSchemas) {
+    const interfaceName = PascalCase(componentSchema.replace('.json', ''));
+    const interface = createInterface(
+      `./src/components/${componentCategoryFolder}/${componentSchema}`,
+      interfaceName
+    );
+    if (interface)
+      fs.writeFileSync(`${componentsDir}/${interfaceName}.ts`, interface);
+  }
+}
+
+// --------------------------------------------
+// Utils
+// --------------------------------------------
+
+function PascalCase(str) {
+  if (!str) return;
+  const words = str.match(/[a-z]+/gi);
+  return words
+    .map(
+      (word) => word.charAt(0).toUpperCase() + word.substring(1).toLowerCase()
+    )
+    .join('');
+}
+
+function createInterface(schemaPath, interfaceName) {
   var tsImports = [];
   var tsInterface = `\n`;
-  tsInterface += `export interface ${formatPath(path)} {\n`;
+  tsInterface += `export interface ${interfaceName} {\n`;
   tsInterface += `  id: number;\n`;
   tsInterface += `  attributes: {\n`;
   var schemaFile;
+  var schema;
   try {
-    schemaFile = fs.readFileSync(
-      `./src/api/${path}/content-types/${path}/schema.json`,
-      'utf8'
-    );
-    var schema = JSON.parse(schemaFile);
+    schemaFile = fs.readFileSync(schemaPath, 'utf8');
+    schema = JSON.parse(schemaFile);
   } catch (e) {
-    console.log(`Skipping ${path} folder: could not parse schema.json`);
-    continue;
+    console.log(`Skipping ${schemaPath}: could not parse schema`);
+    return null;
   }
   const attributes = Object.entries(schema.attributes);
   for (const attribute of attributes) {
-    const key = attribute[0];
-    const value = attribute[1];
-    var type = value.type;
+    const attributeName = attribute[0];
+    const attributeValue = attribute[1];
+    var type = attributeValue.type;
     var tsProperty;
+    // -------------------------------------------------
+    // Relation
+    // -------------------------------------------------
     if (type === 'relation') {
       type =
-        value.target === 'plugin::users-permissions.user'
-          ? 'NestedUser'
-          : `${formatPath(value.target.split('.')[1])}`;
-      if (tsImports.every((x) => x !== type)) tsImports.push(type);
-      const isArray = value.relation === 'oneToMany';
-      tsProperty = `    ${key}: { data: ${type}${
+        attributeValue.target === 'plugin::users-permissions.user'
+          ? 'User'
+          : `${PascalCase(attributeValue.target.split('.')[1])}`;
+      var path = schema.kind === 'collectionType' ? `./${type}` : `../${type}`;
+      if (tsImports.every((x) => x.path !== path))
+        tsImports.push({
+          type,
+          path,
+        });
+      const isArray = attributeValue.relation === 'oneToMany';
+      tsProperty = `    ${attributeName}: { data: ${type}${
         isArray ? '[]' : ''
       } } | number;\n`;
-    } else if (type === 'component') {
-      // TODO: create dedicated types for components
-      type = 'any';
-      tsProperty = `    ${key}: ${type};\n`;
+    }
+    // -------------------------------------------------
+    // Component
+    // -------------------------------------------------
+    else if (type === 'component') {
+      type =
+        attributeValue.target === 'plugin::users-permissions.user'
+          ? 'User'
+          : PascalCase(attributeValue.component.split('.')[1]);
+      var path =
+        schema.kind === 'collectionType' ? `./components/${type}` : `./${type}`;
+      if (tsImports.every((x) => x.path !== path))
+        tsImports.push({
+          type,
+          path,
+        });
+      if (tsImports.every((x) => x.path !== path))
+        tsImports.push({
+          type,
+          path,
+        });
+      const isArray = attributeValue.repeatable;
+      tsProperty = `    ${attributeName}: { data: ${type}${
+        isArray ? '[]' : ''
+      } } | number;\n`;
     } else if (type === 'media') {
       type = 'Media';
-      if (tsImports.every((x) => x !== type)) tsImports.push(type);
-      tsProperty = `    ${key}: { data: ${type}${
-        value.multiple ? '[]' : ''
+      path = './Media';
+      if (tsImports.every((x) => x.path !== path))
+        tsImports.push({
+          type,
+          path,
+        });
+      tsProperty = `    ${attributeName}: { data: ${type}${
+        attributeValue.multiple ? '[]' : ''
       } };\n`;
-    } else if (
+    }
+    // -------------------------------------------------
+    // Enumeration, RichText, Email
+    // -------------------------------------------------
+    else if (
       type === 'enumeration' ||
       type === 'richtext' ||
       type === 'email'
     ) {
       type = 'string';
-      tsProperty = `    ${key}: ${type};\n`;
-    } else if (type === 'json') {
+      tsProperty = `    ${attributeName}: ${type};\n`;
+    }
+    // -------------------------------------------------
+    // Json
+    // -------------------------------------------------
+    else if (type === 'json') {
       type = 'any';
-      tsProperty = `    ${key}: ${type};\n`;
-    } else if (type === 'password') {
+      tsProperty = `    ${attributeName}: ${type};\n`;
+    }
+    // -------------------------------------------------
+    // Password
+    // -------------------------------------------------
+    else if (type === 'password') {
       tsProperty = '';
-    } else if (type === 'integer' || type === 'decimal' || type === 'float') {
+    }
+    // -------------------------------------------------
+    // Number
+    // -------------------------------------------------
+    else if (type === 'integer' || type === 'decimal' || type === 'float') {
       type = 'number';
-      tsProperty = `    ${key}: ${type};\n`;
+      tsProperty = `    ${attributeName}: ${type};\n`;
     } else {
-      tsProperty = `    ${key}: ${type};\n`;
+      tsProperty = `    ${attributeName}: ${type};\n`;
     }
     tsInterface += tsProperty;
   }
@@ -154,21 +248,7 @@ for (const path of root) {
   tsInterface += '}';
   for (const tsImport of tsImports) {
     tsInterface =
-      `import { ${tsImport} } from './${tsImport}';\n` + tsInterface;
+      `import { ${tsImport.type} } from '${tsImport.path}';\n` + tsInterface;
   }
-  fs.writeFileSync(`${typesDir}/${formatPath(path)}.ts`, tsInterface);
-}
-
-// --------------------------------------------
-// Utils
-// --------------------------------------------
-
-function formatPath(str) {
-  const words = str.match(/[a-z]+/gi);
-  if (!words) return;
-  return words
-    .map(function (word) {
-      return word.charAt(0).toUpperCase() + word.substr(1).toLowerCase();
-    })
-    .join('');
+  return tsInterface;
 }
