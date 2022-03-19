@@ -2,20 +2,20 @@
 
 Typescript interface generator for Strapi 4 models.
 
-## Install
+### Install
 
 ```bash
 npm i -D types-4-strapi
 ```
 
-## Run
+### Run
 
 ```bash
 t4s
 ```
 The generated types will be in the `types` folder.
 
-## Strapi 4 quirks
+### Strapi 4 quirks
 
 In most cases, Strapi returns objects where all the properties (aside from `id`) are wrapped into an `attributes` object. For this reason, this is how types-4-strapi's interfaces are structured.
 
