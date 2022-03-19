@@ -188,11 +188,6 @@ function createInterface(schemaPath, interfaceName) {
           type,
           path,
         });
-      if (tsImports.every((x) => x.path !== path))
-        tsImports.push({
-          type,
-          path,
-        });
       const isArray = attributeValue.repeatable;
       tsProperty = `    ${attributeName}: { data: ${type}${
         isArray ? '[]' : ''
