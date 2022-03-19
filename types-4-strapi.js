@@ -87,37 +87,50 @@ fs.writeFileSync(`${typesDir}/Media.ts`, mediaTsInterface);
 // API Types
 // --------------------------------------------
 
-var apiFolders = fs.readdirSync('./src/api').filter((x) => !x.startsWith('.'));
-
-for (const apiFolder of apiFolders) {
-  const interfaceName = pascalCase(apiFolder);
-  const interface = createInterface(
-    `./src/api/${apiFolder}/content-types/${apiFolder}/schema.json`,
-    interfaceName
-  );
-  if (interface) fs.writeFileSync(`${typesDir}/${interfaceName}.ts`, interface);
+var apiFolders;
+try {
+  apiFolders = fs.readdirSync('./src/api').filter((x) => !x.startsWith('.'));
+} catch (e) {
+  console.log('Found no API type, skipping...');
 }
+
+if (apiFolders)
+  for (const apiFolder of apiFolders) {
+    const interfaceName = pascalCase(apiFolder);
+    const interface = createInterface(
+      `./src/api/${apiFolder}/content-types/${apiFolder}/schema.json`,
+      interfaceName
+    );
+    if (interface)
+      fs.writeFileSync(`${typesDir}/${interfaceName}.ts`, interface);
+  }
 
 // --------------------------------------------
 // Components
 // --------------------------------------------
 
-var componentCategoryFolders = fs.readdirSync('./src/components');
-
-for (const componentCategoryFolder of componentCategoryFolders) {
-  var componentSchemas = fs.readdirSync(
-    `./src/components/${componentCategoryFolder}`
-  );
-  for (const componentSchema of componentSchemas) {
-    const interfaceName = pascalCase(componentSchema.replace('.json', ''));
-    const interface = createInterface(
-      `./src/components/${componentCategoryFolder}/${componentSchema}`,
-      interfaceName
-    );
-    if (interface)
-      fs.writeFileSync(`${componentsDir}/${interfaceName}.ts`, interface);
-  }
+var componentCategoryFolders;
+try {
+  componentCategoryFolders = fs.readdirSync('./src/components');
+} catch (e) {
+  console.log('Found no component, skipping...');
 }
+
+if (componentCategoryFolders)
+  for (const componentCategoryFolder of componentCategoryFolders) {
+    var componentSchemas = fs.readdirSync(
+      `./src/components/${componentCategoryFolder}`
+    );
+    for (const componentSchema of componentSchemas) {
+      const interfaceName = pascalCase(componentSchema.replace('.json', ''));
+      const interface = createInterface(
+        `./src/components/${componentCategoryFolder}/${componentSchema}`,
+        interfaceName
+      );
+      if (interface)
+        fs.writeFileSync(`${componentsDir}/${interfaceName}.ts`, interface);
+    }
+  }
 
 // --------------------------------------------
 // Utils
