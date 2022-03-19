@@ -90,7 +90,7 @@ fs.writeFileSync(`${typesDir}/Media.ts`, mediaTsInterface);
 var apiFolders = fs.readdirSync('./src/api').filter((x) => !x.startsWith('.'));
 
 for (const apiFolder of apiFolders) {
-  const interfaceName = PascalCase(apiFolder);
+  const interfaceName = pascalCase(apiFolder);
   const interface = createInterface(
     `./src/api/${apiFolder}/content-types/${apiFolder}/schema.json`,
     interfaceName
@@ -109,7 +109,7 @@ for (const componentCategoryFolder of componentCategoryFolders) {
     `./src/components/${componentCategoryFolder}`
   );
   for (const componentSchema of componentSchemas) {
-    const interfaceName = PascalCase(componentSchema.replace('.json', ''));
+    const interfaceName = pascalCase(componentSchema.replace('.json', ''));
     const interface = createInterface(
       `./src/components/${componentCategoryFolder}/${componentSchema}`,
       interfaceName
@@ -123,7 +123,7 @@ for (const componentCategoryFolder of componentCategoryFolders) {
 // Utils
 // --------------------------------------------
 
-function PascalCase(str) {
+function pascalCase(str) {
   if (!str) return;
   const words = str.match(/[a-z]+/gi);
   return words
@@ -161,7 +161,7 @@ function createInterface(schemaPath, interfaceName) {
       type =
         attributeValue.target === 'plugin::users-permissions.user'
           ? 'User'
-          : `${PascalCase(attributeValue.target.split('.')[1])}`;
+          : `${pascalCase(attributeValue.target.split('.')[1])}`;
       var path = schema.kind === 'collectionType' ? `./${type}` : `../${type}`;
       if (tsImports.every((x) => x.path !== path))
         tsImports.push({
@@ -180,7 +180,7 @@ function createInterface(schemaPath, interfaceName) {
       type =
         attributeValue.target === 'plugin::users-permissions.user'
           ? 'User'
-          : PascalCase(attributeValue.component.split('.')[1]);
+          : pascalCase(attributeValue.component.split('.')[1]);
       var path =
         schema.kind === 'collectionType' ? `./components/${type}` : `./${type}`;
       if (tsImports.every((x) => x.path !== path))
