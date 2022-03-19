@@ -1,8 +1,1 @@
-# ignore everything
-*
-
-# but
-!/.gitignore
-!/.prettierrc
-!/README.md
-!/types-4-strapi.js
+node_modules
