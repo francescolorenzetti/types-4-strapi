@@ -2,16 +2,18 @@
 
 Typescript interface generator for Strapi 4 models.
 
-## Usage
+## Install
 
 ```bash
-npm i -g types-4-strapi
+npm i -D types-4-strapi
 ```
-Navigate into the root of your Strapi project and run the command
+
+## Run
+
 ```bash
 t4s
 ```
-Find the generated types in the `types` folder.
+The generated types will be in the `types` folder.
 
 ## Strapi 4 quirks
 
