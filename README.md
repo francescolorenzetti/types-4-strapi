@@ -15,9 +15,9 @@ t4s
 ```
 The generated types will be in the `types` folder.
 
-### Strapi 4 quirks
+### Attributes
 
-In most cases, Strapi returns objects where all the properties (aside from `id`) are wrapped into an `attributes` object. For this reason, this is how types-4-strapi's interfaces are structured.
+For some inscrutable reason, Strapi 4 returns objects where all the properties (aside from `id`) are wrapped into an `attributes` object. The resulting interfaces will look like this:
 
 ```
 {
@@ -34,7 +34,7 @@ In most cases, Strapi returns objects where all the properties (aside from `id`)
 }
 ```
 
-However, sometimes the same object is returned "flattened". This is the case, for instance, for the `/api/users` endpoint, which returns an array of objects with the following structure:
+However, for some even more inscrutable reason, sometimes the same object is returned "flattened", without an `attributes` object. This is the case, for instance, for the `/api/users` endpoint, which returns an array of Users with the following structure:
 
 ```
 {
