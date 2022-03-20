@@ -3,10 +3,8 @@
 var fs = require('fs');
 
 const typesDir = 'types';
-const componentsDir = 'types/components';
 
 if (!fs.existsSync(typesDir)) fs.mkdirSync(typesDir);
-if (!fs.existsSync(componentsDir)) fs.mkdirSync(componentsDir);
 
 // --------------------------------------------
 // Payload
@@ -93,7 +91,7 @@ var apiFolders;
 try {
   apiFolders = fs.readdirSync('./src/api').filter((x) => !x.startsWith('.'));
 } catch (e) {
-  console.log('Found no API type, skipping...');
+  console.log('No API types found. Skipping...');
 }
 
 if (apiFolders)
@@ -115,10 +113,14 @@ var componentCategoryFolders;
 try {
   componentCategoryFolders = fs.readdirSync('./src/components');
 } catch (e) {
-  console.log('Found no component, skipping...');
+  console.log('No Component types found. Skipping...');
 }
 
-if (componentCategoryFolders)
+if (componentCategoryFolders) {
+  const targetFolder = 'types/components';
+
+  if (!fs.existsSync(targetFolder)) fs.mkdirSync(targetFolder);
+
   for (const componentCategoryFolder of componentCategoryFolders) {
     var componentSchemas = fs.readdirSync(
       `./src/components/${componentCategoryFolder}`
@@ -130,9 +132,10 @@ if (componentCategoryFolders)
         interfaceName
       );
       if (interface)
-        fs.writeFileSync(`${componentsDir}/${interfaceName}.ts`, interface);
+        fs.writeFileSync(`${targetFolder}/${interfaceName}.ts`, interface);
     }
   }
+}
 
 // --------------------------------------------
 // Utils
