@@ -2,20 +2,43 @@
 
 Typescript interface generator for Strapi 4 models.
 
-### Install
+## Install locally
 
 ```bash
-npm i -D types-4-strapi
+npm i --save-dev types-4-strapi
 ```
 
-### Run
+Add t4s to your scripts:
+
+```json
+"scripts": {
+  "develop": "strapi develop",
+  "start": "strapi start",
+  "build": "strapi build",
+  "strapi": "strapi",
+  "t4s": "t4s"
+}
+```
+
+Then run with:
+
+```bash
+npm run t4s
+```
+
+## Install globally
+
+```bash
+npm i -g types-4-strapi
+```
+
+Then run with:
 
 ```bash
 t4s
 ```
-The generated types will be in the `types` folder.
 
-### Attributes
+## Attributes
 
 For some inscrutable reason, Strapi 4 returns objects where all the properties (aside from `id`) are wrapped into an `attributes` object. The resulting interfaces will look like this:
 

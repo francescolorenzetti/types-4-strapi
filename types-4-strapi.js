@@ -12,7 +12,14 @@ if (!fs.existsSync(typesDir)) fs.mkdirSync(typesDir);
 
 const payloadTsInterface = `export interface Payload<T> {
   data: T;
-  meta?: any;
+  meta: {
+    pagination?: {
+      page: number;
+      pageSize: number;
+      pageCount: number;
+      total: number;
+    }
+  };
 }`;
 
 fs.writeFileSync(`${typesDir}/Payload.ts`, payloadTsInterface);
