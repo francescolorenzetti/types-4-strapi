@@ -16,7 +16,7 @@ Add t4s to your scripts:
   "start": "strapi start",
   "build": "strapi build",
   "strapi": "strapi",
-  "types": "t4s"
+  "t4s": "t4s"
 }
 ```
 
