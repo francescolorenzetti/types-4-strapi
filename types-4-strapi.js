@@ -194,9 +194,8 @@ function createInterface(schemaPath, interfaceName) {
           path,
         });
       const isArray = attributeValue.relation === 'oneToMany';
-      tsProperty = `    ${attributeName}: { data: ${type}${
-        isArray ? '[]' : ''
-      } } | number;\n`;
+      const bracketsIfArray = isArray ? '[]' : '';
+      tsProperty = `    ${attributeName}: { data: ${type}${bracketsIfArray} } | number${bracketsIfArray};\n`;
     }
     // -------------------------------------------------
     // Component
@@ -214,9 +213,8 @@ function createInterface(schemaPath, interfaceName) {
           path,
         });
       const isArray = attributeValue.repeatable;
-      tsProperty = `    ${attributeName}: { data: ${type}${
-        isArray ? '[]' : ''
-      } } | number;\n`;
+      const bracketsIfArray = isArray ? '[]' : '';
+      tsProperty = `    ${attributeName}: { data: ${type}${bracketsIfArray} } | number${bracketsIfArray};\n`;
     } else if (type === 'media') {
       type = 'Media';
       path = './Media';
