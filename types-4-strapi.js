@@ -230,12 +230,13 @@ function createInterface(schemaPath, interfaceName) {
       } };\n`;
     }
     // -------------------------------------------------
-    // Enumeration, RichText, Email
+    // Enumeration, RichText, Email, UID
     // -------------------------------------------------
     else if (
       type === 'enumeration' ||
       type === 'richtext' ||
-      type === 'email'
+      type === 'email' ||
+      type === 'uid'
     ) {
       type = 'string';
       tsProperty = `    ${attributeName}: ${type};\n`;
