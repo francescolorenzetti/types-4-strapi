@@ -240,9 +240,10 @@ function createInterface(schemaPath, interfaceName) {
       tsProperty = `    ${attributeName}: ${enumOptions};\n`;
     }
     // -------------------------------------------------
-    // RichText, Email, UID
+    // Text, RichText, Email, UID
     // -------------------------------------------------
     else if (
+      attributeValue.type === 'text' ||
       attributeValue.type === 'richtext' ||
       attributeValue.type === 'email' ||
       attributeValue.type === 'uid'
@@ -268,12 +269,28 @@ function createInterface(schemaPath, interfaceName) {
     // -------------------------------------------------
     else if (
       attributeValue.type === 'integer' ||
+      attributeValue.type === 'biginteger' ||
       attributeValue.type === 'decimal' ||
       attributeValue.type === 'float'
     ) {
       tsPropertyType = 'number';
       tsProperty = `    ${attributeName}: ${tsPropertyType};\n`;
-    } else {
+    }
+    // -------------------------------------------------
+    // Date
+    // -------------------------------------------------
+    else if (
+      attributeValue.type === 'date' ||
+      attributeValue.type === 'datetime' ||
+      attributeValue.type === 'time'
+    ) {
+      tsPropertyType = 'Date';
+      tsProperty = `    ${attributeName}: ${tsPropertyType};\n`;
+    }
+    // -------------------------------------------------
+    // Others
+    // -------------------------------------------------
+    else {
       tsProperty = `    ${attributeName}: ${tsPropertyType};\n`;
     }
     tsInterface += tsProperty;
