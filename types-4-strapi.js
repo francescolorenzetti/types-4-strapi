@@ -175,9 +175,13 @@ function createInterface(schemaPath, interfaceName) {
   }
   const attributes = Object.entries(schema.attributes);
   for (const attribute of attributes) {
-    const attributeName = attribute[0];
+    let attributeName = attribute[0];
     const attributeValue = attribute[1];
     var type = attributeValue.type;
+    var required = attributeValue.required ?? true;
+    if (!required) {
+      attributeName = `${attributeName}?`;
+    }
     var tsProperty;
     // -------------------------------------------------
     // Relation
@@ -187,7 +191,10 @@ function createInterface(schemaPath, interfaceName) {
         attributeValue.target === 'plugin::users-permissions.user'
           ? 'User'
           : `${pascalCase(attributeValue.target.split('.')[1])}`;
-      var path = schema.kind === 'collectionType' ? `./${type}` : `../${type}`;
+      var path =
+        schema.kind === 'collectionType' || schema.kind === 'singleType'
+          ? `./${type}`
+          : `../${type}`;
       if (tsImports.every((x) => x.path !== path))
         tsImports.push({
           type,
@@ -206,7 +213,9 @@ function createInterface(schemaPath, interfaceName) {
           ? 'User'
           : pascalCase(attributeValue.component.split('.')[1]);
       var path =
-        schema.kind === 'collectionType' ? `./components/${type}` : `./${type}`;
+        schema.kind === 'collectionType' || schema.kind === 'singleType'
+          ? `./components/${type}`
+          : `./${type}`;
       if (tsImports.every((x) => x.path !== path))
         tsImports.push({
           type,
@@ -217,7 +226,7 @@ function createInterface(schemaPath, interfaceName) {
       tsProperty = `    ${attributeName}: { data: ${type}${bracketsIfArray} } | number${bracketsIfArray};\n`;
     } else if (type === 'media') {
       type = 'Media';
-      path = './Media';
+      path = '../Media';
       if (tsImports.every((x) => x.path !== path))
         tsImports.push({
           type,
@@ -226,14 +235,17 @@ function createInterface(schemaPath, interfaceName) {
       tsProperty = `    ${attributeName}: { data: ${type}${
         attributeValue.multiple ? '[]' : ''
       } };\n`;
+    } else if (type === 'enumeration') {
+      const enumValues = attributeValue.enum.map((v) => `'${v}'`).join(' | ');
+      tsProperty = `    ${attributeName}: ${enumValues};\n`;
     }
     // -------------------------------------------------
     // Enumeration, RichText, Email, UID
     // -------------------------------------------------
     else if (
-      type === 'enumeration' ||
       type === 'richtext' ||
       type === 'email' ||
+      type === 'text' ||
       type === 'uid'
     ) {
       type = 'string';
@@ -267,7 +279,8 @@ function createInterface(schemaPath, interfaceName) {
   tsInterface += '}';
   for (const tsImport of tsImports) {
     tsInterface =
-      `import { ${tsImport.type} } from '${tsImport.path}';\n` + tsInterface;
+      `import type { ${tsImport.type} } from '${tsImport.path}';\n` +
+      tsInterface;
   }
   return tsInterface;
 }
