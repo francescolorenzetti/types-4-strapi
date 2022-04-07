@@ -173,93 +173,108 @@ function createInterface(schemaPath, interfaceName) {
     console.log(`Skipping ${schemaPath}: could not parse schema`);
     return null;
   }
+  const isComponentSchema = schemaPath.includes('src/components/');
   const attributes = Object.entries(schema.attributes);
   for (const attribute of attributes) {
-    const attributeName = attribute[0];
+    var attributeName = attribute[0];
     const attributeValue = attribute[1];
-    var type = attributeValue.type;
+    const optional = attributeValue.required === false;
+    if (optional) attributeName += '?';
+    var tsPropertyType;
     var tsProperty;
     // -------------------------------------------------
     // Relation
     // -------------------------------------------------
-    if (type === 'relation') {
-      type =
-        attributeValue.target === 'plugin::users-permissions.user'
-          ? 'User'
-          : `${pascalCase(attributeValue.target.split('.')[1])}`;
-      var path = schema.kind === 'collectionType' ? `./${type}` : `../${type}`;
+    if (attributeValue.type === 'relation') {
+      tsPropertyType = attributeValue.target.includes('::user')
+        ? 'User'
+        : `${pascalCase(attributeValue.target.split('.')[1])}`;
+      var path = isComponentSchema
+        ? `../${tsPropertyType}` // component imports api type
+        : `./${tsPropertyType}`; // api type imports api type
       if (tsImports.every((x) => x.path !== path))
         tsImports.push({
-          type,
+          type: tsPropertyType,
           path,
         });
       const isArray = attributeValue.relation === 'oneToMany';
       const bracketsIfArray = isArray ? '[]' : '';
-      tsProperty = `    ${attributeName}: { data: ${type}${bracketsIfArray} } | number${bracketsIfArray};\n`;
+      tsProperty = `    ${attributeName}: { data: ${tsPropertyType}${bracketsIfArray} } | number${bracketsIfArray};\n`;
     }
     // -------------------------------------------------
     // Component
     // -------------------------------------------------
-    else if (type === 'component') {
-      type =
+    else if (attributeValue.type === 'component') {
+      tsPropertyType =
         attributeValue.target === 'plugin::users-permissions.user'
           ? 'User'
           : pascalCase(attributeValue.component.split('.')[1]);
-      var path =
-        schema.kind === 'collectionType' ? `./components/${type}` : `./${type}`;
+      var path = isComponentSchema
+        ? `./${tsPropertyType}` // ........... component imports component
+        : `./components/${tsPropertyType}`; // api type imports component
       if (tsImports.every((x) => x.path !== path))
         tsImports.push({
-          type,
+          type: tsPropertyType,
           path,
         });
       const isArray = attributeValue.repeatable;
       const bracketsIfArray = isArray ? '[]' : '';
-      tsProperty = `    ${attributeName}: { data: ${type}${bracketsIfArray} } | number${bracketsIfArray};\n`;
-    } else if (type === 'media') {
-      type = 'Media';
-      path = './Media';
+      tsProperty = `    ${attributeName}: { data: ${tsPropertyType}${bracketsIfArray} } | number${bracketsIfArray};\n`;
+    } else if (tsPropertyType === 'media') {
+      tsPropertyType = 'Media';
+      path = isComponentSchema ? '../Media' : './Media';
       if (tsImports.every((x) => x.path !== path))
         tsImports.push({
-          type,
+          type: tsPropertyType,
           path,
         });
-      tsProperty = `    ${attributeName}: { data: ${type}${
+      tsProperty = `    ${attributeName}: { data: ${tsPropertyType}${
         attributeValue.multiple ? '[]' : ''
       } };\n`;
     }
     // -------------------------------------------------
-    // Enumeration, RichText, Email, UID
+    // Enumeration
+    // -------------------------------------------------
+    else if (attributeValue.type === 'enumeration') {
+      const enumOptions = attributeValue.enum.map((v) => `'${v}'`).join(' | ');
+      tsProperty = `    ${attributeName}: ${enumOptions};\n`;
+    }
+    // -------------------------------------------------
+    // RichText, Email, UID
     // -------------------------------------------------
     else if (
-      type === 'enumeration' ||
-      type === 'richtext' ||
-      type === 'email' ||
-      type === 'uid'
+      attributeValue.type === 'richtext' ||
+      attributeValue.type === 'email' ||
+      attributeValue.type === 'uid'
     ) {
-      type = 'string';
-      tsProperty = `    ${attributeName}: ${type};\n`;
+      tsPropertyType = 'string';
+      tsProperty = `    ${attributeName}: ${tsPropertyType};\n`;
     }
     // -------------------------------------------------
     // Json
     // -------------------------------------------------
-    else if (type === 'json') {
-      type = 'any';
-      tsProperty = `    ${attributeName}: ${type};\n`;
+    else if (attributeValue.type === 'json') {
+      tsPropertyType = 'any';
+      tsProperty = `    ${attributeName}: ${tsPropertyType};\n`;
     }
     // -------------------------------------------------
     // Password
     // -------------------------------------------------
-    else if (type === 'password') {
+    else if (attributeValue.type === 'password') {
       tsProperty = '';
     }
     // -------------------------------------------------
     // Number
     // -------------------------------------------------
-    else if (type === 'integer' || type === 'decimal' || type === 'float') {
-      type = 'number';
-      tsProperty = `    ${attributeName}: ${type};\n`;
+    else if (
+      attributeValue.type === 'integer' ||
+      attributeValue.type === 'decimal' ||
+      attributeValue.type === 'float'
+    ) {
+      tsPropertyType = 'number';
+      tsProperty = `    ${attributeName}: ${tsPropertyType};\n`;
     } else {
-      tsProperty = `    ${attributeName}: ${type};\n`;
+      tsProperty = `    ${attributeName}: ${tsPropertyType};\n`;
     }
     tsInterface += tsProperty;
   }
