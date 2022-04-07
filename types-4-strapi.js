@@ -220,7 +220,11 @@ function createInterface(schemaPath, interfaceName) {
       const isArray = attributeValue.repeatable;
       const bracketsIfArray = isArray ? '[]' : '';
       tsProperty = `    ${attributeName}: { data: ${tsPropertyType}${bracketsIfArray} } | number${bracketsIfArray};\n`;
-    } else if (tsPropertyType === 'media') {
+    }
+    // -------------------------------------------------
+    // Media
+    // -------------------------------------------------
+    else if (attributeValue.type === 'media') {
       tsPropertyType = 'Media';
       path = isComponentSchema ? '../Media' : './Media';
       if (tsImports.every((x) => x.path !== path))
@@ -233,6 +237,14 @@ function createInterface(schemaPath, interfaceName) {
       } };\n`;
     }
     // -------------------------------------------------
+    // Dynamic zone
+    // -------------------------------------------------
+    else if (attributeValue.type === 'dynamiczone') {
+      tsPropertyType = 'any';
+      tsProperty = `    ${attributeName}: ${tsPropertyType};\n`;
+    }
+
+    // -------------------------------------------------
     // Enumeration
     // -------------------------------------------------
     else if (attributeValue.type === 'enumeration') {
@@ -243,6 +255,7 @@ function createInterface(schemaPath, interfaceName) {
     // Text, RichText, Email, UID
     // -------------------------------------------------
     else if (
+      attributeValue.type === 'string' ||
       attributeValue.type === 'text' ||
       attributeValue.type === 'richtext' ||
       attributeValue.type === 'email' ||
@@ -291,6 +304,7 @@ function createInterface(schemaPath, interfaceName) {
     // Others
     // -------------------------------------------------
     else {
+      tsPropertyType = 'any';
       tsProperty = `    ${attributeName}: ${tsPropertyType};\n`;
     }
     tsInterface += tsProperty;
