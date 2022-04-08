@@ -28,18 +28,27 @@ fs.writeFileSync(`${typesDir}/Payload.ts`, payloadTsInterface);
 // User
 // --------------------------------------------
 
-const userTsInterface = `export interface User {
+const userTsInterface = `export type UserAttributes = {
+  username: string;
+  email: string;
+  provider: string;
+  confirmed: boolean;
+  blocked: boolean;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+export type UserI = {
   id: number;
-  attributes: {
-    username: string;
-    email: string;
-    provider: string;
-    confirmed: boolean;
-    blocked: boolean;
-    createdAt: Date;
-    updatedAt: Date;
-  }
-}`;
+  attributes: UserAttributes
+}
+
+export type UserIFlat = {
+  id: number;
+} &  UserAttributes
+
+export type User = UserI | UserIFlat
+`;
 
 fs.writeFileSync(`${typesDir}/User.ts`, userTsInterface);
 
@@ -67,26 +76,35 @@ fs.writeFileSync(`${typesDir}/MediaFormat.ts`, mediaFormatTsInterface);
 
 var mediaTsInterface = `import { MediaFormat } from './MediaFormat';
 
-export interface Media {
+export type MediaAttributes = {
+  name: string;
+  alternativeText: string;
+  caption: string;
+  width: number;
+  height: number;
+  formats: { thumbnail: MediaFormat; medium: MediaFormat; small: MediaFormat; };
+  hash: string;
+  ext: string;
+  mime: string;
+  size: number;
+  url: string;
+  previewUrl: string;
+  provider: string;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+export type MediaI = {
   id: number;
-  attributes: {
-    name: string;
-    alternativeText: string;
-    caption: string;
-    width: number;
-    height: number;
-    formats: { thumbnail: MediaFormat; medium: MediaFormat; small: MediaFormat; };
-    hash: string;
-    ext: string;
-    mime: string;
-    size: number;
-    url: string;
-    previewUrl: string;
-    provider: string;
-    createdAt: Date;
-    updatedAt: Date;
-  }
-}`;
+  attributes: MediaAttributes
+}
+
+export type MediaIFlat = {
+  id: number;
+} & MediaAttributes
+
+export type Media = MediaI | MediaIFlat
+`;
 
 fs.writeFileSync(`${typesDir}/Media.ts`, mediaTsInterface);
 
@@ -160,10 +178,9 @@ function pascalCase(str) {
 
 function createInterface(schemaPath, interfaceName) {
   var tsImports = [];
+  // attribute only
   var tsInterface = `\n`;
-  tsInterface += `export interface ${interfaceName} {\n`;
-  tsInterface += `  id: number;\n`;
-  tsInterface += `  attributes: {\n`;
+  tsInterface += `export type ${interfaceName}Attributes = {\n`;
   var schemaFile;
   var schema;
   try {
@@ -309,8 +326,35 @@ function createInterface(schemaPath, interfaceName) {
     }
     tsInterface += tsProperty;
   }
-  tsInterface += `  }\n`;
   tsInterface += '}';
+  
+  // native strapi
+  tsInterface += `\n`;
+  tsInterface += `export type ${interfaceName}I = {\n`;
+  tsInterface += `  id: number;\n`;
+  tsInterface += `  attributes: ${interfaceName}Attributes\n`;
+  tsInterface += '}';
+  
+  // flat
+  tsInterface += `\n`;
+  tsInterface += `export type ${interfaceName}IFlat = {\n`;
+  tsInterface += `  id: number;\n`;
+  tsInterface += `} & ${interfaceName}Attributes`;
+  
+  // combined type
+  tsInterface += `\n`;
+  tsInterface += `export type ${interfaceName} = ${interfaceName}I | ${interfaceName}IFlat\n`;
+
+  // type guard
+  tsInterface += `
+
+export function is${interfaceName}(obj: any): obj is ${interfaceName} {
+  return ${attributes.map(att=>`obj.${att[0]}!==undefined`).join(' && ')};
+}
+export function is${interfaceName}Flat(obj: any): obj is ${interfaceName}IFlat {
+  return obj.attributes === undefined && is${interfaceName}(obj);
+}`;
+  
   for (const tsImport of tsImports) {
     tsInterface =
       `import { ${tsImport.type} } from '${tsImport.path}';\n` + tsInterface;
