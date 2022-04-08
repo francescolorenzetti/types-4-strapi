@@ -352,7 +352,7 @@ export function is${interfaceName}(obj: any): obj is ${interfaceName} {
   return ${attributes.map(att=>`obj.${att[0]}!==undefined`).join(' && ')};
 }
 export function is${interfaceName}Flat(obj: any): obj is ${interfaceName}IFlat {
-  return obj.attributes === undefined && is${interfaceName}(obj);
+  return obj.attributes === undefined // && is${interfaceName}(obj);
 }`;
   
   for (const tsImport of tsImports) {
