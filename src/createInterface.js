@@ -1,164 +1,7 @@
-#!/usr/bin/env node
+const fs = require('fs');
+const pascalCase = require('./pascalCase');
 
-var fs = require('fs');
-
-const typesDir = 'types';
-
-if (!fs.existsSync(typesDir)) fs.mkdirSync(typesDir);
-
-// --------------------------------------------
-// Payload
-// --------------------------------------------
-
-const payloadTsInterface = `export interface Payload<T> {
-  data: T;
-  meta: {
-    pagination?: {
-      page: number;
-      pageSize: number;
-      pageCount: number;
-      total: number;
-    }
-  };
-}`;
-
-fs.writeFileSync(`${typesDir}/Payload.ts`, payloadTsInterface);
-
-// --------------------------------------------
-// User
-// --------------------------------------------
-
-const userTsInterface = `export interface User {
-  id: number;
-  attributes: {
-    username: string;
-    email: string;
-    provider: string;
-    confirmed: boolean;
-    blocked: boolean;
-    createdAt: Date;
-    updatedAt: Date;
-  }
-}`;
-
-fs.writeFileSync(`${typesDir}/User.ts`, userTsInterface);
-
-// --------------------------------------------
-// MediaFormat
-// --------------------------------------------
-
-var mediaFormatTsInterface = `export interface MediaFormat {
-  name: string;
-  hash: string;
-  ext: string;
-  mime: string;
-  width: number;
-  height: number;
-  size: number;
-  path: string;
-  url: string;
-}`;
-
-fs.writeFileSync(`${typesDir}/MediaFormat.ts`, mediaFormatTsInterface);
-
-// --------------------------------------------
-// Media
-// --------------------------------------------
-
-var mediaTsInterface = `import { MediaFormat } from './MediaFormat';
-
-export interface Media {
-  id: number;
-  attributes: {
-    name: string;
-    alternativeText: string;
-    caption: string;
-    width: number;
-    height: number;
-    formats: { thumbnail: MediaFormat; medium: MediaFormat; small: MediaFormat; };
-    hash: string;
-    ext: string;
-    mime: string;
-    size: number;
-    url: string;
-    previewUrl: string;
-    provider: string;
-    createdAt: Date;
-    updatedAt: Date;
-  }
-}`;
-
-fs.writeFileSync(`${typesDir}/Media.ts`, mediaTsInterface);
-
-// --------------------------------------------
-// API Types
-// --------------------------------------------
-
-var apiFolders;
-try {
-  apiFolders = fs.readdirSync('./src/api').filter((x) => !x.startsWith('.'));
-} catch (e) {
-  console.log('No API types found. Skipping...');
-}
-
-if (apiFolders)
-  for (const apiFolder of apiFolders) {
-    const interfaceName = pascalCase(apiFolder);
-    const interface = createInterface(
-      `./src/api/${apiFolder}/content-types/${apiFolder}/schema.json`,
-      interfaceName
-    );
-    if (interface)
-      fs.writeFileSync(`${typesDir}/${interfaceName}.ts`, interface);
-  }
-
-// --------------------------------------------
-// Components
-// --------------------------------------------
-
-var componentCategoryFolders;
-try {
-  componentCategoryFolders = fs.readdirSync('./src/components');
-} catch (e) {
-  console.log('No Component types found. Skipping...');
-}
-
-if (componentCategoryFolders) {
-  const targetFolder = 'types/components';
-
-  if (!fs.existsSync(targetFolder)) fs.mkdirSync(targetFolder);
-
-  for (const componentCategoryFolder of componentCategoryFolders) {
-    var componentSchemas = fs.readdirSync(
-      `./src/components/${componentCategoryFolder}`
-    );
-    for (const componentSchema of componentSchemas) {
-      const interfaceName = pascalCase(componentSchema.replace('.json', ''));
-      const interface = createInterface(
-        `./src/components/${componentCategoryFolder}/${componentSchema}`,
-        interfaceName
-      );
-      if (interface)
-        fs.writeFileSync(`${targetFolder}/${interfaceName}.ts`, interface);
-    }
-  }
-}
-
-// --------------------------------------------
-// Utils
-// --------------------------------------------
-
-function pascalCase(str) {
-  if (!str) return;
-  const words = str.match(/[a-z]+/gi);
-  return words
-    .map(
-      (word) => word.charAt(0).toUpperCase() + word.substring(1).toLowerCase()
-    )
-    .join('');
-}
-
-function createInterface(schemaPath, interfaceName) {
+module.exports = (schemaPath, interfaceName) => {
   var tsImports = [];
   var tsInterface = `\n`;
   tsInterface += `export interface ${interfaceName} {\n`;
@@ -170,7 +13,7 @@ function createInterface(schemaPath, interfaceName) {
     schemaFile = fs.readFileSync(schemaPath, 'utf8');
     schema = JSON.parse(schemaFile);
   } catch (e) {
-    console.log(`Skipping ${schemaPath}: could not parse schema`);
+    console.log(`Skipping ${schemaPath}: could not parse schema`, e);
     return null;
   }
   const isComponentSchema = schemaPath.includes('src/components/');
@@ -316,4 +159,4 @@ function createInterface(schemaPath, interfaceName) {
       `import { ${tsImport.type} } from '${tsImport.path}';\n` + tsInterface;
   }
   return tsInterface;
-}
+};
