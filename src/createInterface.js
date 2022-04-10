@@ -1,5 +1,5 @@
 const fs = require('fs');
-const pascalCase = require('./pascalCase');
+const { pascalCase, isOptional } = require('./utils');
 
 module.exports = (schemaPath, interfaceName) => {
   var tsImports = [];
@@ -21,8 +21,7 @@ module.exports = (schemaPath, interfaceName) => {
   for (const attribute of attributes) {
     var attributeName = attribute[0];
     const attributeValue = attribute[1];
-    const optional = attributeValue.required === false;
-    if (optional) attributeName += '?';
+    if (isOptional(attributeValue)) attributeName += '?';
     var tsPropertyType;
     var tsProperty;
     // -------------------------------------------------

@@ -2,7 +2,7 @@
 
 const fs = require('fs');
 const createInterface = require('./createInterface');
-const pascalCase = require('./pascalCase');
+const { pascalCase, isOptional } = require('./utils');
 
 const typesDir = 'types';
 
