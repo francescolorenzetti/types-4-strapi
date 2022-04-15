@@ -82,7 +82,17 @@ module.exports = (schemaPath, interfaceName) => {
     // Dynamic zone
     // -------------------------------------------------
     else if (attributeValue.type === 'dynamiczone') {
-      tsPropertyType = 'any';
+      tsPropertyType = '';
+      for (const componentType of attributeValue.components) {
+        if (!tsPropertyType) tsPropertyType = '[\n';
+        const type = pascalCase(componentType.split('.')[1]);
+        tsPropertyType += `      | ({ __component: '${componentType}'; } & ${type})\n`
+        tsImports.push({
+          type,
+          path: `./components/${type}`,
+        })
+      }
+      if (tsPropertyType) tsPropertyType += '    ]';
       tsProperty = `    ${attributeName}: ${tsPropertyType};\n`;
     }
 
@@ -140,6 +150,15 @@ module.exports = (schemaPath, interfaceName) => {
       attributeValue.type === 'time'
     ) {
       tsPropertyType = 'Date';
+      tsProperty = `    ${attributeName}: ${tsPropertyType};\n`;
+    }
+    // -------------------------------------------------
+    // Boolean
+    // -------------------------------------------------
+    else if (
+      attributeValue.type === 'boolean'
+    ) {
+      tsPropertyType = 'boolean';
       tsProperty = `    ${attributeName}: ${tsPropertyType};\n`;
     }
     // -------------------------------------------------
