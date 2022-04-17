@@ -86,11 +86,11 @@ module.exports = (schemaPath, interfaceName) => {
       for (const componentType of attributeValue.components) {
         if (!tsPropertyType) tsPropertyType = '[\n';
         const type = pascalCase(componentType.split('.')[1]);
-        tsPropertyType += `      | ({ __component: '${componentType}'; } & ${type})\n`
+        tsPropertyType += `      | ({ __component: '${componentType}'; } & ${type})\n`;
         tsImports.push({
           type,
           path: `./components/${type}`,
-        })
+        });
       }
       if (tsPropertyType) tsPropertyType += '    ]';
       tsProperty = `    ${attributeName}: ${tsPropertyType};\n`;
@@ -155,9 +155,7 @@ module.exports = (schemaPath, interfaceName) => {
     // -------------------------------------------------
     // Boolean
     // -------------------------------------------------
-    else if (
-      attributeValue.type === 'boolean'
-    ) {
+    else if (attributeValue.type === 'boolean') {
       tsPropertyType = 'boolean';
       tsProperty = `    ${attributeName}: ${tsPropertyType};\n`;
     }
