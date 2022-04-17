@@ -64,6 +64,22 @@ module.exports = (schemaPath, interfaceName) => {
       tsProperty = `    ${attributeName}: { data: ${tsPropertyType}${bracketsIfArray} } | number${bracketsIfArray};\n`;
     }
     // -------------------------------------------------
+    // Dynamic zone
+    // -------------------------------------------------
+    else if (attributeValue.type === 'dynamiczone') {
+      tsPropertyType = '';
+      for (const component of attributeValue.components) {
+        if (!tsPropertyType) tsPropertyType = '[\n';
+        tsPropertyType += `      | ({ __component: '${component}'; } & ${type})\n`;
+        tsImports.push({
+          type: pascalCase(component.split('.')[1]),
+          path: `./components/${type}`,
+        });
+      }
+      if (tsPropertyType) tsPropertyType += '    ]';
+      tsProperty = `    ${attributeName}: ${tsPropertyType};\n`;
+    }
+    // -------------------------------------------------
     // Media
     // -------------------------------------------------
     else if (attributeValue.type === 'media') {
@@ -78,24 +94,6 @@ module.exports = (schemaPath, interfaceName) => {
         attributeValue.multiple ? '[]' : ''
       } };\n`;
     }
-    // -------------------------------------------------
-    // Dynamic zone
-    // -------------------------------------------------
-    else if (attributeValue.type === 'dynamiczone') {
-      tsPropertyType = '';
-      for (const componentType of attributeValue.components) {
-        if (!tsPropertyType) tsPropertyType = '[\n';
-        const type = pascalCase(componentType.split('.')[1]);
-        tsPropertyType += `      | ({ __component: '${componentType}'; } & ${type})\n`;
-        tsImports.push({
-          type,
-          path: `./components/${type}`,
-        });
-      }
-      if (tsPropertyType) tsPropertyType += '    ]';
-      tsProperty = `    ${attributeName}: ${tsPropertyType};\n`;
-    }
-
     // -------------------------------------------------
     // Enumeration
     // -------------------------------------------------
