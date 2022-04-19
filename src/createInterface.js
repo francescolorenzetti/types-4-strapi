@@ -67,17 +67,7 @@ module.exports = (schemaPath, interfaceName) => {
     // Dynamic zone
     // -------------------------------------------------
     else if (attributeValue.type === 'dynamiczone') {
-      tsPropertyType = '';
-      for (const component of attributeValue.components) {
-        if (!tsPropertyType) tsPropertyType = '[\n';
-        const type = pascalCase(component.split('.')[1]);
-        tsPropertyType += `      | ({ __component: '${component}'; } & ${type})\n`;
-        tsImports.push({
-          type,
-          path: `./components/${type}`,
-        });
-      }
-      if (tsPropertyType) tsPropertyType += '    ]';
+      tsPropertyType = 'any';
       tsProperty = `    ${attributeName}: ${tsPropertyType};\n`;
     }
     // -------------------------------------------------
