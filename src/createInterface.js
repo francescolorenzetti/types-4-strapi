@@ -70,9 +70,10 @@ module.exports = (schemaPath, interfaceName) => {
       tsPropertyType = '';
       for (const component of attributeValue.components) {
         if (!tsPropertyType) tsPropertyType = '[\n';
+        const type = pascalCase(component.split('.')[1]);
         tsPropertyType += `      | ({ __component: '${component}'; } & ${type})\n`;
         tsImports.push({
-          type: pascalCase(component.split('.')[1]),
+          type,
           path: `./components/${type}`,
         });
       }
