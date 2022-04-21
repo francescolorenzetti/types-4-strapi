@@ -2,6 +2,7 @@
 
 const fs = require('fs');
 const createInterface = require('./createInterface');
+const createComponentInterface = require('./createComponentInterface');
 const { pascalCase, isOptional } = require('./utils');
 
 const typesDir = 'types';
@@ -136,7 +137,7 @@ if (componentCategoryFolders) {
     );
     for (const componentSchema of componentSchemas) {
       const interfaceName = pascalCase(componentSchema.replace('.json', ''));
-      const interface = createInterface(
+      const interface = createComponentInterface(
         `./src/components/${componentCategoryFolder}/${componentSchema}`,
         interfaceName
       );

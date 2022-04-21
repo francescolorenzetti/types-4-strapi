@@ -6,7 +6,6 @@ module.exports = (schemaPath, interfaceName) => {
   var tsInterface = `\n`;
   tsInterface += `export interface ${interfaceName} {\n`;
   tsInterface += `  id: number;\n`;
-  tsInterface += `  attributes: {\n`;
   var schemaFile;
   var schema;
   try {
@@ -21,63 +20,55 @@ module.exports = (schemaPath, interfaceName) => {
     var attributeName = attribute[0];
     const attributeValue = attribute[1];
     if (isOptional(attributeValue)) attributeName += '?';
-    var tsPropertyType;
+    var tsType;
     var tsProperty;
     // -------------------------------------------------
     // Relation
     // -------------------------------------------------
     if (attributeValue.type === 'relation') {
-      tsPropertyType = attributeValue.target.includes('::user')
+      tsType = attributeValue.target.includes('::user')
         ? 'User'
         : `${pascalCase(attributeValue.target.split('.')[1])}`;
-      const tsImportPath = `./${tsPropertyType}`;
+      const tsImportPath = `../${tsType}`;
       if (tsImports.every((x) => x.path !== tsImportPath))
         tsImports.push({
-          type: tsPropertyType,
+          type: tsType,
           path: tsImportPath,
         });
       const isArray = attributeValue.relation === 'oneToMany';
       const bracketsIfArray = isArray ? '[]' : '';
-      tsProperty = `    ${attributeName}: { data: ${tsPropertyType}${bracketsIfArray} } | number${bracketsIfArray};\n`;
+      tsProperty = `  ${attributeName}: { data: ${tsType}${bracketsIfArray} } | number${bracketsIfArray};\n`;
     }
     // -------------------------------------------------
     // Component
     // -------------------------------------------------
     else if (attributeValue.type === 'component') {
-      tsPropertyType =
+      tsType =
         attributeValue.target === 'plugin::users-permissions.user'
           ? 'User'
           : pascalCase(attributeValue.component.split('.')[1]);
-      const tsImportPath = `./components/${tsPropertyType}`;
+      var tsImportPath = `./${tsType}`;
       if (tsImports.every((x) => x.path !== tsImportPath))
         tsImports.push({
-          type: tsPropertyType,
+          type: tsType,
           path: tsImportPath,
         });
       const isArray = attributeValue.repeatable;
       const bracketsIfArray = isArray ? '[]' : '';
-      tsProperty = `    ${attributeName}: { data: ${tsPropertyType}${bracketsIfArray} } | number${bracketsIfArray};\n`;
-    }
-    // -------------------------------------------------
-    // Dynamic zone
-    // -------------------------------------------------
-    else if (attributeValue.type === 'dynamiczone') {
-      // TODO
-      tsPropertyType = 'any';
-      tsProperty = `    ${attributeName}: ${tsPropertyType};\n`;
+      tsProperty = `  ${attributeName}: { data: ${tsType}${bracketsIfArray} } | number${bracketsIfArray};\n`;
     }
     // -------------------------------------------------
     // Media
     // -------------------------------------------------
     else if (attributeValue.type === 'media') {
-      tsPropertyType = 'Media';
-      const tsImportPath = './Media';
+      tsType = 'Media';
+      const tsImportPath = '../Media';
       if (tsImports.every((x) => x.path !== tsImportPath))
         tsImports.push({
-          type: tsPropertyType,
+          type: tsType,
           path: tsImportPath,
         });
-      tsProperty = `    ${attributeName}: { data: ${tsPropertyType}${
+      tsProperty = `  ${attributeName}: { data: ${tsType}${
         attributeValue.multiple ? '[]' : ''
       } };\n`;
     }
@@ -86,7 +77,7 @@ module.exports = (schemaPath, interfaceName) => {
     // -------------------------------------------------
     else if (attributeValue.type === 'enumeration') {
       const enumOptions = attributeValue.enum.map((v) => `'${v}'`).join(' | ');
-      tsProperty = `    ${attributeName}: ${enumOptions};\n`;
+      tsProperty = `  ${attributeName}: ${enumOptions};\n`;
     }
     // -------------------------------------------------
     // Text, RichText, Email, UID
@@ -98,15 +89,15 @@ module.exports = (schemaPath, interfaceName) => {
       attributeValue.type === 'email' ||
       attributeValue.type === 'uid'
     ) {
-      tsPropertyType = 'string';
-      tsProperty = `    ${attributeName}: ${tsPropertyType};\n`;
+      tsType = 'string';
+      tsProperty = `  ${attributeName}: ${tsType};\n`;
     }
     // -------------------------------------------------
     // Json
     // -------------------------------------------------
     else if (attributeValue.type === 'json') {
-      tsPropertyType = 'any';
-      tsProperty = `    ${attributeName}: ${tsPropertyType};\n`;
+      tsType = 'any';
+      tsProperty = `  ${attributeName}: ${tsType};\n`;
     }
     // -------------------------------------------------
     // Password
@@ -123,8 +114,8 @@ module.exports = (schemaPath, interfaceName) => {
       attributeValue.type === 'decimal' ||
       attributeValue.type === 'float'
     ) {
-      tsPropertyType = 'number';
-      tsProperty = `    ${attributeName}: ${tsPropertyType};\n`;
+      tsType = 'number';
+      tsProperty = `  ${attributeName}: ${tsType};\n`;
     }
     // -------------------------------------------------
     // Date
@@ -134,26 +125,25 @@ module.exports = (schemaPath, interfaceName) => {
       attributeValue.type === 'datetime' ||
       attributeValue.type === 'time'
     ) {
-      tsPropertyType = 'Date';
-      tsProperty = `    ${attributeName}: ${tsPropertyType};\n`;
+      tsType = 'Date';
+      tsProperty = `  ${attributeName}: ${tsType};\n`;
     }
     // -------------------------------------------------
     // Boolean
     // -------------------------------------------------
     else if (attributeValue.type === 'boolean') {
-      tsPropertyType = 'boolean';
-      tsProperty = `    ${attributeName}: ${tsPropertyType};\n`;
+      tsType = 'boolean';
+      tsProperty = `  ${attributeName}: ${tsType};\n`;
     }
     // -------------------------------------------------
     // Others
     // -------------------------------------------------
     else {
-      tsPropertyType = 'any';
-      tsProperty = `    ${attributeName}: ${tsPropertyType};\n`;
+      tsType = 'any';
+      tsProperty = `  ${attributeName}: ${tsType};\n`;
     }
     tsInterface += tsProperty;
   }
-  tsInterface += `  }\n`;
   tsInterface += '}';
   for (const tsImport of tsImports) {
     tsInterface =
