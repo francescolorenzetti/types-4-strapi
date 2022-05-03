@@ -56,7 +56,7 @@ module.exports = (schemaPath, interfaceName) => {
         });
       const isArray = attributeValue.repeatable;
       const bracketsIfArray = isArray ? '[]' : '';
-      tsProperty = `    ${attributeName}: { data: ${tsPropertyType}${bracketsIfArray} } | number${bracketsIfArray};\n`;
+      tsProperty = `    ${attributeName}: ${tsPropertyType}${bracketsIfArray};\n`;
     }
     // -------------------------------------------------
     // Dynamic zone

@@ -55,7 +55,7 @@ module.exports = (schemaPath, interfaceName) => {
         });
       const isArray = attributeValue.repeatable;
       const bracketsIfArray = isArray ? '[]' : '';
-      tsProperty = `  ${attributeName}: { data: ${tsType}${bracketsIfArray} } | number${bracketsIfArray};\n`;
+      tsProperty = `  ${attributeName}: ${tsType}${bracketsIfArray};\n`;
     }
     // -------------------------------------------------
     // Media
