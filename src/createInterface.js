@@ -36,7 +36,7 @@ module.exports = (schemaPath, interfaceName) => {
           type: tsPropertyType,
           path: tsImportPath,
         });
-      const isArray = attributeValue.relation === 'oneToMany';
+      const isArray = attributeValue.relation.endsWith('ToMany');
       const bracketsIfArray = isArray ? '[]' : '';
       tsProperty = `    ${attributeName}: { data: ${tsPropertyType}${bracketsIfArray} } | number${bracketsIfArray};\n`;
     }
