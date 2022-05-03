@@ -153,6 +153,10 @@ module.exports = (schemaPath, interfaceName) => {
     }
     tsInterface += tsProperty;
   }
+  if (schema.pluginOptions?.i18n?.localized) {
+    tsInterface += `    locale: string;\n`;
+    tsInterface += `    localizations: { data: ${interfaceName}[] }\n`;
+  }
   tsInterface += `  }\n`;
   tsInterface += '}\n';
   for (const tsImport of tsImports) {
