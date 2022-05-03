@@ -23,7 +23,8 @@ const payloadTsInterface = `export interface Payload<T> {
       total: number;
     }
   };
-}`;
+}
+`;
 
 fs.writeFileSync(`${typesDir}/Payload.ts`, payloadTsInterface);
 
@@ -42,7 +43,8 @@ const userTsInterface = `export interface User {
     createdAt: Date;
     updatedAt: Date;
   }
-}`;
+}
+`;
 
 fs.writeFileSync(`${typesDir}/User.ts`, userTsInterface);
 
@@ -60,7 +62,8 @@ var mediaFormatTsInterface = `export interface MediaFormat {
   size: number;
   path: string;
   url: string;
-}`;
+}
+`;
 
 fs.writeFileSync(`${typesDir}/MediaFormat.ts`, mediaFormatTsInterface);
 
@@ -89,7 +92,8 @@ export interface Media {
     createdAt: Date;
     updatedAt: Date;
   }
-}`;
+}
+`;
 
 fs.writeFileSync(`${typesDir}/Media.ts`, mediaTsInterface);
 
