@@ -37,7 +37,7 @@ module.exports = (schemaPath, interfaceName) => {
         });
       const isArray = attributeValue.relation === 'oneToMany';
       const bracketsIfArray = isArray ? '[]' : '';
-      tsProperty = `  ${attributeName}: { data: ${tsType}${bracketsIfArray} } | number${bracketsIfArray};\n`;
+      tsProperty = `  ${attributeName}: { data: ${tsType}${bracketsIfArray} };\n`;
     }
     // -------------------------------------------------
     // Component

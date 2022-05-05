@@ -1,6 +1,6 @@
 {
   "name": "types-4-strapi",
-  "version": "1.0.21",
+  "version": "1.0.22",
   "description": "Typescript interface generator for Strapi 4 models",
   "main": "./src/index.js",
   "bin": {
