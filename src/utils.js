@@ -1,3 +1,5 @@
+const fs = require('fs');
+
 module.exports.pascalCase = (str) => {
   if (!str) return;
   const words = str.match(/[a-z]+/gi);
@@ -14,4 +16,9 @@ module.exports.isOptional = (attributeValue) => {
     return false;
   }
   return attributeValue.required !== true;
+};
+
+module.exports.createFile = (filePath, data) => {
+  console.log(`Creating: ${filePath}`);
+  fs.writeFileSync(filePath, data);
 };

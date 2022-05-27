@@ -3,9 +3,13 @@
 const fs = require('fs');
 const createInterface = require('./createInterface');
 const createComponentInterface = require('./createComponentInterface');
-const { pascalCase, isOptional } = require('./utils');
+const { pascalCase, isOptional, createFile } = require('./utils');
 
 const typesDir = 'types';
+
+const args = process.argv;
+
+const strapiSrcPathArg = args[2];
 
 if (!fs.existsSync(typesDir)) fs.mkdirSync(typesDir);
 
@@ -26,7 +30,7 @@ const payloadTsInterface = `export interface Payload<T> {
 }
 `;
 
-fs.writeFileSync(`${typesDir}/Payload.ts`, payloadTsInterface);
+createFile(`${typesDir}/Payload.ts`, payloadTsInterface);
 
 // --------------------------------------------
 // User
@@ -46,7 +50,7 @@ const userTsInterface = `export interface User {
 }
 `;
 
-fs.writeFileSync(`${typesDir}/User.ts`, userTsInterface);
+createFile(`${typesDir}/User.ts`, userTsInterface);
 
 // --------------------------------------------
 // MediaFormat
@@ -65,7 +69,7 @@ var mediaFormatTsInterface = `export interface MediaFormat {
 }
 `;
 
-fs.writeFileSync(`${typesDir}/MediaFormat.ts`, mediaFormatTsInterface);
+createFile(`${typesDir}/MediaFormat.ts`, mediaFormatTsInterface);
 
 // --------------------------------------------
 // Media
@@ -95,15 +99,27 @@ export interface Media {
 }
 `;
 
-fs.writeFileSync(`${typesDir}/Media.ts`, mediaTsInterface);
+createFile(`${typesDir}/Media.ts`, mediaTsInterface);
 
 // --------------------------------------------
 // API Types
 // --------------------------------------------
 
+const strapiSrcPath = strapiSrcPathArg || './src';
+
+const strapiBackendApiPath = strapiSrcPathArg
+  ? `${strapiSrcPathArg}/api`
+  : './src/api';
+
+const strapiBackendComponentsPath = strapiSrcPathArg
+  ? `${strapiSrcPathArg}/components`
+  : './src/components';
+
 var apiFolders;
 try {
-  apiFolders = fs.readdirSync('./src/api').filter((x) => !x.startsWith('.'));
+  apiFolders = fs
+    .readdirSync(strapiBackendApiPath)
+    .filter((x) => !x.startsWith('.'));
 } catch (e) {
   console.log('No API types found. Skipping...');
 }
@@ -112,11 +128,13 @@ if (apiFolders)
   for (const apiFolder of apiFolders) {
     const interfaceName = pascalCase(apiFolder);
     const interface = createInterface(
-      `./src/api/${apiFolder}/content-types/${apiFolder}/schema.json`,
+      `${strapiBackendApiPath}/${apiFolder}/content-types/${apiFolder}/schema.json`,
       interfaceName
     );
-    if (interface)
-      fs.writeFileSync(`${typesDir}/${interfaceName}.ts`, interface);
+
+    if (interface) {
+      createFile(`${typesDir}/${interfaceName}.ts`, interface);
+    }
   }
 
 // --------------------------------------------
@@ -125,7 +143,7 @@ if (apiFolders)
 
 var componentCategoryFolders;
 try {
-  componentCategoryFolders = fs.readdirSync('./src/components');
+  componentCategoryFolders = fs.readdirSync(strapiBackendComponentsPath);
 } catch (e) {
   console.log('No Component types found. Skipping...');
 }
@@ -137,16 +155,17 @@ if (componentCategoryFolders) {
 
   for (const componentCategoryFolder of componentCategoryFolders) {
     var componentSchemas = fs.readdirSync(
-      `./src/components/${componentCategoryFolder}`
+      `${strapiBackendComponentsPath}/${componentCategoryFolder}`
     );
     for (const componentSchema of componentSchemas) {
       const interfaceName = pascalCase(componentSchema.replace('.json', ''));
       const interface = createComponentInterface(
-        `./src/components/${componentCategoryFolder}/${componentSchema}`,
+        `${strapiBackendComponentsPath}/${componentCategoryFolder}/${componentSchema}`,
         interfaceName
       );
-      if (interface)
-        fs.writeFileSync(`${targetFolder}/${interfaceName}.ts`, interface);
+      if (interface) {
+        createFile(`${targetFolder}/${interfaceName}.ts`, interface);
+      }
     }
   }
 }

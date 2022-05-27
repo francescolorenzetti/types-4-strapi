@@ -38,6 +38,15 @@ Then run with:
 t4s
 ```
 
+### Pass input directory
+
+You can pass an input path a Strapi `src` directory e.g
+
+```bash
+# Inside "./packages/frontend"
+t4s ../backend/src
+```
+
 ## Attributes
 
 For some inscrutable reason, Strapi 4 returns objects where all the properties (aside from `id`) are wrapped into an `attributes` object. The resulting interfaces will look like this:
