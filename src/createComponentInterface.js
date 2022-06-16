@@ -37,7 +37,7 @@ module.exports = (schemaPath, interfaceName) => {
         });
       const isArray = attributeValue.relation === 'oneToMany';
       const bracketsIfArray = isArray ? '[]' : '';
-      tsProperty = `  ${attributeName}: { data: ${tsType}${bracketsIfArray} };\n`;
+      tsProperty = `  ${attributeName}: ${tsType}${bracketsIfArray};\n`;
     }
     // -------------------------------------------------
     // Component
@@ -68,9 +68,9 @@ module.exports = (schemaPath, interfaceName) => {
           type: tsType,
           path: tsImportPath,
         });
-      tsProperty = `  ${attributeName}: { data: ${tsType}${
+      tsProperty = `  ${attributeName}: ${tsType}${
         attributeValue.multiple ? '[]' : ''
-      } };\n`;
+      };\n`;
     }
     // -------------------------------------------------
     // Enumeration
